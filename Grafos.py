@@ -45,34 +45,34 @@ class Grafo:
         #guardar en disco
         pass
 
-    @staticmethod
-    def generar_malla(n, m, es_dirigido = False):
-        grafo = Grafo(es_dirigido)
+    @classmethod
+    def generar_malla(cls, n, m, es_dirigido = False):
+        grafo = cls(es_dirigido)
         return grafo
     
-    @staticmethod
-    def generar_ErdosRenyi(n, m, es_dirigido = False):
-        grafo = Grafo(es_dirigido)
+    @classmethod
+    def generar_ErdosRenyi(cls, n, m, es_dirigido = False):
+        grafo = cls(es_dirigido)
         return grafo
     
-    @staticmethod
-    def generar_Gilbert(n, p, es_dirigido = False):
-        grafo = Grafo(es_dirigido)
+    @classmethod
+    def generar_Gilbert(cls, n, p, es_dirigido = False):
+        grafo = cls(es_dirigido)
         return grafo
     
-    @staticmethod
-    def generar_geo_simple(n, r, es_dirigido = False):
-        grafo = Grafo(es_dirigido)
+    @classmethod
+    def generar_geo_simple(cls, n, r, es_dirigido = False):
+        grafo = cls(es_dirigido)
         return grafo
     
-    @staticmethod
-    def generar_BarbasiAlbert_variante(n, d, es_dirigido = False):
-        grafo = Grafo(es_dirigido)
+    @classmethod
+    def generar_BarbasiAlbert_variante(cls, n, d, es_dirigido = False):
+        grafo = cls(es_dirigido)
         return grafo
     
-    @staticmethod
-    def generar_DorogovtsevMendes(n, es_dirigido = False):
-        grafo = Grafo(es_dirigido)
+    @classmethod
+    def generar_DorogovtsevMendes(cls, n, es_dirigido = False):
+        grafo = cls(es_dirigido)
         return grafo
 
 class Nodo:
