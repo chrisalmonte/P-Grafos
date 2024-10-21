@@ -1,16 +1,15 @@
-class Grafo:
-    es_dirigido = False
-    nodos = []
+class Grafo:    
 
     def __init__(self, es_dirigido):
         self.es_dirigido = es_dirigido
+        self.nodos = []
 
     def num_nodos(self):
         return self.nodos.count 
 
     def conectar_nodos(self, id_de, id_a, **kwargs):
         """
-        Conecta 2 nodos dentro del grafo tomando en cuenta si es dirigido o no.
+        Crea una arista y conecta 2 nodos dentro del grafo tomando en cuenta si es dirigido o no.
         """
         nodo_de = self.get_nodo(id_de)
         nodo_a = self.get_nodo(id_a)
@@ -35,15 +34,17 @@ class Grafo:
         """
         Crea un nuevo nodo con ID único.
         """
-        if self.get_nodo(id) is not None:
-            nodo = Nodo(id)
-            for llave, valor in kwargs.items():
-                nodo.definir_propiedad(llave, valor)
+        if self.get_nodo(id) is None:
+            nodo = Nodo(id, **kwargs)
             self.nodos.append(nodo)
 
-    def guardar(nombre_archivo):
-        #guardar en disco
-        pass
+    def guardar(self, nombre_archivo, identificador = ""):
+        with open(nombre_archivo + ".gv", 'w') as archivo:
+            archivo.write(("digraph " if self.es_dirigido else "graph ") + ((identificador + " {") if identificador else "{") + '\n')
+            for nodo in self.nodos:
+                for vecino in nodo.vecinos:
+                    archivo.write(str(nodo.identificador) + (" -> " if self.es_dirigido else " -- ") + str(vecino[0].identificador) + '\n')
+            archivo.write("}")
 
     @classmethod
     def generar_malla(cls, n, m, es_dirigido = False):
@@ -76,30 +77,31 @@ class Grafo:
         return grafo
 
 class Nodo:
-    identificador = ""
-    propiedad = {}
-    vecinos = [] ##tuplas (nodo, arista)
-
-    def __init__(self, id):
+    def __init__(self, id, **kwargs):
         self.identificador = id
+        self.propiedad = {}
+        self.vecinos = [] ##tuplas (nodo, arista)
+        for llave, valor in kwargs.items():
+                self.propiedad[llave] = valor
+    
+    def __str__(self):
+        return str(self.identificador)
     
     def conectar_a(self, nodo, arista):
         for vecino in self.vecinos:
             if nodo is vecino[0]:
-                self.vecinos.remove(vecino)
+                self.vecinos.remove(vecino)    
         self.vecinos.append((nodo, arista))
 
     def definir_propiedad(self, llave, valor):
         self.propiedad[llave] = valor
 
-class Arista:
-    propiedad = {}
+class Arista:    
 
     def __init__(self, **kwargs):
+        self.propiedad = {}
         for llave, valor in kwargs.items():
                 self.propiedad[llave] = valor        
 
     def definir_propiedad(self, llave, valor):
         self.propiedad[llave] = valor
-
-##{Nodo, Nodo, Nodo, Nodo
