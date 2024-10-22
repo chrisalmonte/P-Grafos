@@ -1,4 +1,5 @@
 import random
+import math
 
 class Grafo:
     def __init__(self, es_dirigido):
@@ -105,13 +106,32 @@ class Grafo:
             grafo.crear_nodo(i)
         for i in range(0, n):
             for j in range(0, n):
+                if i == j:
+                    break
                 if(random.randint(0, 100) >= p):
                     grafo.conectar_nodos(i, j)
         return grafo
     
     @classmethod
     def generar_geo_simple(cls, n, r, es_dirigido = False):
+        """
+        Crea un gráfo con el método geográfico simple. Define n nodos con coordenadas aleatorias normales. 
+        Se conectan aquellos entre distancia menor o igual a r. 
+        :param n: Cantidad de nodos
+        :param r: Distancia mínima para conectarse.
+        :return: Grafo
+        """
+        r = min(r, 1)
         grafo = cls(es_dirigido)
+        for i in range(0, n):
+            grafo.crear_nodo(i, x = random.random(), y = random.random())
+        for i in range(0, n):
+            for j in range(0, n):
+                if i == j:
+                    break
+                if (random.random() >= math.dist([grafo.get_nodo(i).propiedad["x"], grafo.get_nodo(i).propiedad["y"]],
+                                                 [grafo.get_nodo(j).propiedad["x"], grafo.get_nodo(i).propiedad["y"]])):
+                    grafo.conectar_nodos(i, j)
         return grafo
     
     @classmethod
