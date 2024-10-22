@@ -1,10 +1,12 @@
-class Grafo:    
-
+class Grafo:
     def __init__(self, es_dirigido):
         self.es_dirigido = es_dirigido
         self.nodos = []
 
     def num_nodos(self):
+        """
+        Cantidad de nodos en el grafo.
+        """
         return self.nodos.count 
 
     def conectar_nodos(self, id_de, id_a, **kwargs):
@@ -32,13 +34,16 @@ class Grafo:
     
     def crear_nodo(self, id, **kwargs):
         """
-        Crea un nuevo nodo con ID único.
+        Crea un nuevo nodo con ID único y las propiedades especificadas.
         """
         if self.get_nodo(id) is None:
             nodo = Nodo(id, **kwargs)
             self.nodos.append(nodo)
 
     def guardar(self, nombre_archivo, identificador = ""):
+        """
+        Guarda el grafo en un archivo GV con el nombre especificado.
+        """
         with open(nombre_archivo + ".gv", 'w') as archivo:
             archivo.write(("digraph " if self.es_dirigido else "graph ") + ((identificador + " {") if identificador else "{") + '\n')
             for nodo in self.nodos:
@@ -88,20 +93,29 @@ class Nodo:
         return str(self.identificador)
     
     def conectar_a(self, nodo, arista):
+        """
+        Conecta el nodo al nodo especificado usando la arista dada.
+        """
         for vecino in self.vecinos:
             if nodo is vecino[0]:
                 self.vecinos.remove(vecino)    
         self.vecinos.append((nodo, arista))
 
     def definir_propiedad(self, llave, valor):
+        """
+        Define la llave y valor de una propiedad en el nodo.
+        """
         self.propiedad[llave] = valor
 
-class Arista:    
 
+class Arista:
     def __init__(self, **kwargs):
         self.propiedad = {}
         for llave, valor in kwargs.items():
                 self.propiedad[llave] = valor        
 
     def definir_propiedad(self, llave, valor):
+        """
+        Define la llave y valor de una propiedad en la arista.
+        """
         self.propiedad[llave] = valor
