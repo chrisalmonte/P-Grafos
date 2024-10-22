@@ -53,7 +53,18 @@ class Grafo:
 
     @classmethod
     def generar_malla(cls, n, m, es_dirigido = False):
+        """
+        Genera una malla de n filas por m columnas.
+        """
         grafo = cls(es_dirigido)
+        for i in range(0, n):
+            for j in range(0,m):
+                id_actual = j + (i * m)
+                grafo.crear_nodo(id_actual)
+                if (id_actual % m) != 0:
+                    grafo.conectar_nodos(id_actual, id_actual - 1)
+                if id_actual >= m:
+                    grafo.conectar_nodos(id_actual, id_actual - m)
         return grafo
     
     @classmethod
