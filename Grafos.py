@@ -1,3 +1,5 @@
+import random
+
 class Grafo:
     def __init__(self, es_dirigido):
         self.es_dirigido = es_dirigido
@@ -55,10 +57,13 @@ class Grafo:
     def generar_malla(cls, n, m, es_dirigido = False):
         """
         Genera una malla de n filas por m columnas.
+        :param n: Filas
+        :param m: Columnas
+        :return: Grafo
         """
         grafo = cls(es_dirigido)
         for i in range(0, n):
-            for j in range(0,m):
+            for j in range(0, m):
                 id_actual = j + (i * m)
                 grafo.crear_nodo(id_actual)
                 if (id_actual % m) != 0:
@@ -69,7 +74,21 @@ class Grafo:
     
     @classmethod
     def generar_ErdosRenyi(cls, n, m, es_dirigido = False):
+        """
+        Crea un gráfo con el método Erdös-Renyi. Define n nodos y elige m parejas al azar.
+        :param n: Cantidad de nodos
+        :param m: Cantidad de aristas
+        :return: Grafo
+        """
         grafo = cls(es_dirigido)
+        for i in range(0, n):
+            grafo.crear_nodo(i)
+        for i in range(0, m):
+            n_de = random.randrange(0, n)
+            n_a = random.randrange(0, n)
+            if n_de == n_a:
+                n_a = (n_a + 1) % n
+            grafo.conectar_nodos(n_de, n_a)
         return grafo
     
     @classmethod
