@@ -49,7 +49,7 @@ class Grafo:
             for nodo in self.nodos:
                 for vecino in nodo.vecinos:
                     archivo.write(str(nodo.identificador) + (" -> " if self.es_dirigido else " -- ") + str(vecino[0].identificador) + '\n')
-            archivo.write("}")
+            archivo.write("}\n")
 
     @classmethod
     def generar_malla(cls, n, m, es_dirigido = False):
