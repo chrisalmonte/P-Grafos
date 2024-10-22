@@ -75,7 +75,7 @@ class Grafo:
     @classmethod
     def generar_ErdosRenyi(cls, n, m, es_dirigido = False):
         """
-        Crea un gráfo con el método Erdös-Renyi. Define n nodos y elige m parejas al azar.
+        Crea un gráfo con el modelo Erdös-Renyi. Define n nodos y elige m parejas al azar.
         :param n: Cantidad de nodos
         :param m: Cantidad de aristas
         :return: Grafo
@@ -93,7 +93,20 @@ class Grafo:
     
     @classmethod
     def generar_Gilbert(cls, n, p, es_dirigido = False):
+        """
+        Crea un gráfo con el modelo de Gilbert. Define n nodos con p probabilidad de cada uno conectarse con el resto.
+        :param n: Cantidad de nodos
+        :param p: [0 - 1] Probabilidad de conectar un nodo con el resto.
+        :return: Grafo
+        """
+        p = min(p, 1) * 100
         grafo = cls(es_dirigido)
+        for i in range(0, n):
+            grafo.crear_nodo(i)
+        for i in range(0, n):
+            for j in range(0, n):
+                if(random.randint(0, 100) >= p):
+                    grafo.conectar_nodos(i, j)
         return grafo
     
     @classmethod
