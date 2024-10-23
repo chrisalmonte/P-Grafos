@@ -142,15 +142,15 @@ class Grafo:
         :param d: Grado máximo esperado por cada nodo.
         :return: Grafo
         """
-        if d == 0:
-            return
         grafo = cls(es_dirigido)
         grafo.crear_nodo(0)
         nodos_revueltos = [0]
 
         for i in range(1, n):
-            random.shuffle(nodos_revueltos)
             grafo.crear_nodo(i)
+            if d <= 0:
+                break
+            random.shuffle(nodos_revueltos)
             for j in nodos_revueltos:
                 probabilidad = 1 - (len(grafo.get_nodo(j).vecinos) / d)
                 if random.random() <= probabilidad:
