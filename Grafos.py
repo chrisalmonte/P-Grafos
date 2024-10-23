@@ -50,8 +50,11 @@ class Grafo:
         with open(nombre_archivo + ".gv", 'w') as archivo:
             archivo.write(("digraph " if self.es_dirigido else "graph ") + ((identificador + " {") if identificador else "{") + '\n')
             for nodo in self.nodos:
-                for vecino in nodo.vecinos:
-                    archivo.write(str(nodo.identificador) + (" -> " if self.es_dirigido else " -- ") + str(vecino[0].identificador) + '\n')
+                if len(nodo.vecinos) == 0:
+                    archivo.write(str(nodo) + ";\n")
+                else:
+                    for vecino in nodo.vecinos:
+                        archivo.write(str(nodo) + (" -> " if self.es_dirigido else " -- ") + str(vecino[0]) + '\n')
             archivo.write("}\n")
 
     @classmethod
