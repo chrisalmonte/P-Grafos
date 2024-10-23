@@ -132,7 +132,7 @@ class Grafo:
             for j in range(0, n):
                 if i == j:
                     break
-                if (random.random() >= math.dist([grafo.get_nodo(i).propiedad["x"], grafo.get_nodo(i).propiedad["y"]],
+                if (r >= math.dist([grafo.get_nodo(i).propiedad["x"], grafo.get_nodo(i).propiedad["y"]],
                                                  [grafo.get_nodo(j).propiedad["x"], grafo.get_nodo(i).propiedad["y"]])):
                     grafo.conectar_nodos(i, j)
         return grafo
