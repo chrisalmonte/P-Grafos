@@ -10,7 +10,7 @@ class Grafo:
         """
         Cantidad de nodos en el grafo.
         """
-        return self.nodos.count 
+        return len(self.nodos) 
 
     def conectar_nodos(self, id_de, id_a, **kwargs):
         """
@@ -78,7 +78,7 @@ class Grafo:
         """
         Crea un gráfo con el modelo Erdös-Renyi. Define n nodos y elige m parejas al azar.
         :param n: Cantidad de nodos
-        :param m: Cantidad de aristas
+        :param m: Cantidad de aristas (>= n-1)
         :return: Grafo
         """
         grafo = cls(es_dirigido)
@@ -108,7 +108,7 @@ class Grafo:
             for j in range(0, n):
                 if i == j:
                     break
-                if(random.randint(0, 100) >= p):
+                if(random.randint(0, 100) <= p):
                     grafo.conectar_nodos(i, j)
         return grafo
     
@@ -136,7 +136,28 @@ class Grafo:
     
     @classmethod
     def generar_BarbasiAlbert_variante(cls, n, d, es_dirigido = False):
+        """
+        Crea un gráfo con una variante del Método Barbasi-Albert. 
+        :param n: Cantidad de nodos
+        :param d: Grado máximo esperado por cada nodo.
+        :return: Grafo
+        """
+        if d == 0:
+            return
         grafo = cls(es_dirigido)
+        grafo.crear_nodo(0)
+        nodos_revueltos = [0]
+
+        for i in range(1, n):
+            random.shuffle(nodos_revueltos)
+            grafo.crear_nodo(i)
+            for j in nodos_revueltos:
+                probabilidad = 1 - (len(grafo.get_nodo(j).vecinos) / d)
+                if random.random() <= probabilidad:
+                    grafo.conectar_nodos(i,j)
+                if len(grafo.get_nodo(i).vecinos) == d:
+                    break
+            nodos_revueltos.append(i)
         return grafo
     
     @classmethod
