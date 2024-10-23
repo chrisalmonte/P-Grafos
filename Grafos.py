@@ -162,7 +162,26 @@ class Grafo:
     
     @classmethod
     def generar_DorogovtsevMendes(cls, n, es_dirigido = False):
+        """
+        Se crean 3 nodos y 3 aristas formando un triángulo.
+        Para cada nodo adicional, se selecciona una arista al azar y se crean aristas entre sus extremos y el nodo nuevo.
+        :param n: Cantidad de nodos (>= 3)
+        :return: Grafo
+        """
+        n = max(n, 3)
         grafo = cls(es_dirigido)
+        grafo.crear_nodo(0)
+        grafo.crear_nodo(1)
+        grafo.crear_nodo(2)
+        grafo.conectar_nodos(0, 1)
+        grafo.conectar_nodos(1, 2)
+        grafo.conectar_nodos(2, 0)
+        for i in range(3, n):
+            grafo.crear_nodo(i)
+            arista_de = random.randrange(0, i)
+            arista_a = grafo.get_nodo(arista_de).vecinos[random.randrange(0, len(grafo.get_nodo(arista_de).vecinos))][0].identificador
+            grafo.conectar_nodos(i, arista_de)
+            grafo.conectar_nodos(i, arista_a)
         return grafo
 
 class Nodo:
