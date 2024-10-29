@@ -1,5 +1,6 @@
 import random
 import math
+import os
 
 class Grafo:
     def __init__(self, es_dirigido):
@@ -47,6 +48,15 @@ class Grafo:
         """
         Guarda el grafo en un archivo GV con el nombre especificado.
         """
+        try:
+            os.mkdir("grafos")
+            nombre_archivo = "grafos/" + nombre_archivo
+        except FileExistsError:
+            nombre_archivo = "grafos/" + nombre_archivo
+            pass
+        except:
+            pass
+
         with open(nombre_archivo + ".gv", 'w') as archivo:
             archivo.write(("digraph " if self.es_dirigido else "graph ") + ((identificador + " {") if identificador else "{") + '\n')
             for nodo in self.nodos:
