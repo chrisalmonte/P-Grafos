@@ -6,6 +6,7 @@ class Grafo:
     def __init__(self, es_dirigido):
         self.es_dirigido = es_dirigido
         self.nodos = []
+        self.aristas = []
 
     def num_nodos(self):
         """
@@ -23,9 +24,8 @@ class Grafo:
             return
         
         arista = Arista(**kwargs)
+        self.aristas.append(arista)
         nodo_de.conectar_a(nodo_a, arista)
-        if not self.es_dirigido:
-            nodo_a.conectar_a(nodo_de, arista)
 
     def get_nodo(self, id):
         """
@@ -214,7 +214,8 @@ class Nodo:
         """
         for vecino in self.vecinos:
             if nodo is vecino[0]:
-                self.vecinos.remove(vecino)    
+                self.vecinos.remove(vecino)
+        arista.definir_extremos(self.identificador, nodo.identificador)
         self.vecinos.append((nodo, arista))
 
     def definir_propiedad(self, llave, valor):
@@ -227,8 +228,15 @@ class Nodo:
 class Arista:
     def __init__(self, **kwargs):
         self.propiedad = {}
+        self.extremos = ("", "")
         for llave, valor in kwargs.items():
-                self.propiedad[llave] = valor        
+                self.propiedad[llave] = valor
+    
+    def __str__(self):
+        return str(self.extremos[0]) + " --> " + str(self.extremos[1])
+
+    def definir_extremos(self, id_nodo_de, id_nodo_a):
+        self.extremos = (id_nodo_de, id_nodo_a)
 
     def definir_propiedad(self, llave, valor):
         """
