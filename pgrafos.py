@@ -26,6 +26,8 @@ class Grafo:
         arista = Arista(**kwargs)
         self.aristas.append(arista)
         nodo_de.conectar_a(nodo_a, arista)
+        if not self.es_dirigido:
+            nodo_a.conectar_a(nodo_de, arista)
 
     def get_nodo(self, id):
         """
