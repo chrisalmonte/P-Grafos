@@ -198,6 +198,48 @@ class Grafo:
             grafo.conectar_nodos(i, arista_de)
             grafo.conectar_nodos(i, arista_a)
         return grafo
+    
+    @classmethod
+    def generar_desde_archivo(cls, ruta):
+        """
+        Genera el grafo a partir de un archivo .gv creado por pgrafos.
+        :param ruta: Ruta del archivo.
+        """
+        grafo = None
+        conector = "--"
+
+        if not os.path.exists(ruta):
+            print("No se encuentra el archivo de grafo especificado.")
+            return grafo
+        
+        with open(ruta) as archivo:
+            for linea in archivo:
+                if grafo is None:
+                    if linea.find('{') != -1:
+                        grafo = cls(linea.find("digraph") != -1)
+                        conector = ("->" if grafo.es_dirigido else "--")
+                else:
+                    if linea.find('}') != -1:
+                        return grafo
+                    conexion = linea.partition(conector)
+                    if not conexion[1] or not conexion[2]:
+                        conexion = linea.partition(';')
+                        if conexion[0]:
+                            nodo = conexion[0].replace(" ", "").strip()
+                            grafo.crear_nodo(nodo)
+                    else:
+                        nodo_de = conexion[0].replace(" ","").strip()
+                        nodo_a = conexion[2].replace(" ","").strip()
+                        grafo.crear_nodo(nodo_de)
+                        grafo.crear_nodo(nodo_a)
+                        grafo.conectar_nodos(nodo_de, nodo_a)
+            print("ADVERTENCIA: No se encontró marcador final del grafo. Verifique la integridad del archivo.")
+            return grafo
+    
+    #def BFS(self, s):
+    #def DFS_recursivo(self, s):
+    #def DFS_iterativo(self, s):
+
 
 class Nodo:
     def __init__(self, id, **kwargs):
