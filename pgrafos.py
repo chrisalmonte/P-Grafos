@@ -45,6 +45,16 @@ class Grafo:
         if self.get_nodo(id) is None:
             nodo = Nodo(id, **kwargs)
             self.nodos.append(nodo)
+    
+    def copiar_nodo(self, nodo):
+        """
+        Agrega una copia sin vecinos de un objeto de clase Nodo al grafo, siempre y cuando no exista un nodo con el mismo identificador en el grafo. 
+        :param nodo: Nodo a agregar.
+        """
+        if self.get_nodo(nodo.identificador) is None:
+            copia = Nodo(nodo.identificador)
+            copia.propiedad = nodo.propiedad.copy()
+            self.nodos.append(copia)
 
     def guardar(self, nombre_archivo, identificador = ""):
         """
@@ -68,6 +78,36 @@ class Grafo:
                     for vecino in nodo.vecinos:
                         archivo.write(str(nodo) + (" -> " if self.es_dirigido else " -- ") + str(vecino[0]) + '\n')
             archivo.write("}\n")
+    
+    def BFS(self, s):
+        """
+        Genera un grafo con el árbol inducido por el algorítmo de búsqueda "Breadth First Search".
+        :param s: ID del nodo de inicio. 
+        :return: Grafo
+        """
+        if(self.get_nodo(s) is None):
+            return None
+        capas = [[s]]
+        descubiertos = [s]
+        arbol = Grafo(self.es_dirigido)
+        arbol.copiar_nodo(self.get_nodo(s))
+        capas.append([])
+        for capa in capas:
+            capas.append([])
+            for nodoActual in capa:
+                for vecino in self.get_nodo(nodoActual).vecinos:
+                    id = vecino[0].identificador
+                    if id not in descubiertos:
+                        descubiertos.append(id)
+                        capas[-1].append(id)
+                        arbol.copiar_nodo(vecino[0])
+                        arbol.conectar_nodos(self.get_nodo(nodoActual).identificador, id)
+            if not capas[-1]:
+                capas.pop()
+        return arbol
+
+    #def DFS_R(self, s):
+    #def DFS_I(self, s):
 
     @classmethod
     def generar_malla(cls, n, m, es_dirigido = False):
@@ -235,10 +275,6 @@ class Grafo:
                         grafo.conectar_nodos(nodo_de, nodo_a)
             print("ADVERTENCIA: No se encontró marcador final del grafo. Verifique la integridad del archivo.")
             return grafo
-    
-    #def BFS(self, s):
-    #def DFS_recursivo(self, s):
-    #def DFS_iterativo(self, s):
 
 
 class Nodo:
