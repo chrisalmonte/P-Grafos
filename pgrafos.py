@@ -133,7 +133,14 @@ class Grafo:
                 index_nodo_raiz = (index_nodo_raiz - 1)
         return arbol
 
-    #def DFS_I(self, s):
+    def DFS_recursivo(self, s):
+        """
+        Genera un grafo con el árbol inducido por el algorítmo de búsqueda "Depth First Search" de manera iterativa.
+        :param s: ID del nodo de inicio. 
+        :return: Grafo
+        """
+        arbol = Grafo(self.es_dirigido) 
+        return arbol
 
     @classmethod
     def generar_malla(cls, n, m, es_dirigido = False):
@@ -302,6 +309,14 @@ class Grafo:
             print("ADVERTENCIA: No se encontró marcador final del grafo. Verifique la integridad del archivo.")
             return grafo
 
+@staticmethod
+def conectar_grafos(grafo_a, grafo_b, nodo_a = None, nodo_b = None):
+    grafo_combinado = Grafo(grafo_a.es_dirigido and grafo_b.es_dirigido)
+    grafo_combinado.nodos.extend(grafo_a.nodos)
+    grafo_combinado.nodos.extend(grafo_b.nodos)
+    grafo_combinado.aristas.extend(grafo_a.aristas)
+    grafo_combinado.aristas.extend(grafo_b.aristas)
+    return grafo_combinado
 
 class Nodo:
     def __init__(self, id, **kwargs):
