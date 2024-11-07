@@ -106,7 +106,31 @@ class Grafo:
                 capas.pop()
         return arbol
 
-    #def DFS_R(self, s):
+    def DFS_iterativo(self, s):
+        if(self.get_nodo(s) is None):
+            return None
+        descubiertos = [self.get_nodo(s)]
+        index_nodo_raiz = 0
+        nodo_siguiente = None
+        arbol = Grafo(self.es_dirigido)
+        arbol.copiar_nodo(descubiertos[0])
+        while index_nodo_raiz > -1:
+            print("Nodo_siguiente: " + str(descubiertos[index_nodo_raiz]))
+            nodo_siguiente = None
+            for vecino in descubiertos[index_nodo_raiz].vecinos:
+                print("checking " + str(vecino[0]) + " in " + str(descubiertos[index_nodo_raiz]))
+                if (vecino[0] not in descubiertos):
+                    print("Found " + str(vecino[0]) + " in " + str(descubiertos[index_nodo_raiz]))
+                    arbol.copiar_nodo(vecino[0])
+                    arbol.conectar_nodos(descubiertos[index_nodo_raiz].identificador, vecino[0].identificador)
+                    descubiertos.insert(index_nodo_raiz + 1, vecino[0])
+                    index_nodo_raiz += 1
+                    nodo_siguiente = vecino[0]
+                    break
+            if (nodo_siguiente is None):
+                index_nodo_raiz = (index_nodo_raiz - 1)
+        return arbol
+
     #def DFS_I(self, s):
 
     @classmethod
