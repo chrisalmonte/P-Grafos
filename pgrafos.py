@@ -107,6 +107,11 @@ class Grafo:
         return arbol
 
     def DFS_iterativo(self, s):
+        """
+        Genera un grafo con el árbol inducido por el algorítmo de búsqueda "Depth First Search" de manera iterativa.
+        :param s: ID del nodo de inicio. 
+        :return: Grafo
+        """
         if(self.get_nodo(s) is None):
             return None
         descubiertos = [self.get_nodo(s)]
