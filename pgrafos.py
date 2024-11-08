@@ -46,13 +46,13 @@ class Grafo:
             nodo = Nodo(id, **kwargs)
             self.nodos.append(nodo)
     
-    def copiar_nodo(self, nodo):
+    def copiar_nodo(self, nodo, nuevo_id = None):
         """
         Agrega una copia sin vecinos de un objeto de clase Nodo al grafo, siempre y cuando no exista un nodo con el mismo identificador en el grafo. 
         :param nodo: Nodo a agregar.
         """
         if self.get_nodo(nodo.identificador) is None:
-            copia = Nodo(nodo.identificador)
+            copia = Nodo(nodo.identificador if (nuevo_id is None) else nuevo_id)
             copia.propiedad = nodo.propiedad.copy()
             self.nodos.append(copia)
 
@@ -139,7 +139,16 @@ class Grafo:
         :param s: ID del nodo de inicio. 
         :return: Grafo
         """
-        arbol = Grafo(self.es_dirigido) 
+        if(self.get_nodo(s) is None):
+            return None
+        nodo_origen = self.get_nodo(s)
+        nodo_origen.definir_propiedad("visitado", True)
+        arbol = Grafo(self.es_dirigido)
+        arbol.copiar_nodo(nodo_origen)        
+        for vecino in nodo_origen.vecinos:
+            if not vecino[0].propiedad.get("visitado", False):
+                arbol.nodos.extend(self.DFS_recursivo(vecino[0].identificador).nodos)
+                arbol.conectar_nodos(s, vecino[0].identificador)
         return arbol
 
     @classmethod
@@ -308,15 +317,6 @@ class Grafo:
                         grafo.conectar_nodos(nodo_de, nodo_a)
             print("ADVERTENCIA: No se encontró marcador final del grafo. Verifique la integridad del archivo.")
             return grafo
-
-@staticmethod
-def conectar_grafos(grafo_a, grafo_b, nodo_a = None, nodo_b = None):
-    grafo_combinado = Grafo(grafo_a.es_dirigido and grafo_b.es_dirigido)
-    grafo_combinado.nodos.extend(grafo_a.nodos)
-    grafo_combinado.nodos.extend(grafo_b.nodos)
-    grafo_combinado.aristas.extend(grafo_a.aristas)
-    grafo_combinado.aristas.extend(grafo_b.aristas)
-    return grafo_combinado
 
 class Nodo:
     def __init__(self, id, **kwargs):
