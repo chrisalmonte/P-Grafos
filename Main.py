@@ -1,24 +1,71 @@
+#En este módulo se generan los ejemplos requeridos utilizando P-Grafos
+
 import pgrafos
 
-def crear_fs(archivo_base):
-    for i in range(3):
-        if i == 0:
-            ruta = archivo_base + "_30"
-        elif i == 1:
-            ruta = archivo_base + "_100"
-        else:
-            ruta = archivo_base + "_500"
-        grafo = pgrafos.Grafo.generar_desde_archivo( "grafos/" + ruta + ".gv")
-        grafo_fs = grafo.BFS("15")
-        grafo_fs.guardar(ruta + "_BFS")
-        grafo_fs = grafo.DFS_iterativo("15")
-        grafo_fs.guardar(ruta + "_DFSi")
-        grafo_fs = grafo.DFS_recursivo("15")
-        grafo_fs.guardar(ruta + "_DFSr")
+def crear_arboles_FS(nombre_archivo, grafo, id_nodo_s):
+    grafo_fs = grafo.BFS(id_nodo_s)
+    grafo_fs.guardar(nombre_archivo + "_BFS")
+    grafo_fs = grafo.DFS_iterativo(id_nodo_s)
+    grafo_fs.guardar(nombre_archivo + "_DFSi")
+    grafo_fs = grafo.DFS_recursivo(id_nodo_s)
+    grafo_fs.guardar(nombre_archivo + "_DFSr")
 
-crear_fs("Barbasi-Albert/BarbasiAlbert_variante")
-crear_fs("Dorogovstev-Mendes/DorogovtsevMendes")
-crear_fs("Erdos-Renyi/ErdosRenyi")
-crear_fs("geografico/geografico")
-crear_fs("Gilbert/gilbert")
-crear_fs("malla/malla")
+grafo = pgrafos.Grafo.generar_BarbasiAlbert_variante(30, 3)
+grafo.guardar("Barbasi-Albert/BarbasiAlbert_variante_30")
+crear_arboles_FS("Barbasi-Albert/BarbasiAlbert_variante_30", grafo, 15)
+grafo = pgrafos.Grafo.generar_BarbasiAlbert_variante(100, 4)
+grafo.guardar("Barbasi-Albert/BarbasiAlbert_variante_100")
+crear_arboles_FS("Barbasi-Albert/BarbasiAlbert_variante_100", grafo, 50)
+grafo = pgrafos.Grafo.generar_BarbasiAlbert_variante(500, 5)
+grafo.guardar("Barbasi-Albert/BarbasiAlbert_variante_500")
+crear_arboles_FS("Barbasi-Albert/BarbasiAlbert_variante_500", grafo, 250)
+
+grafo = pgrafos.Grafo.generar_DorogovtsevMendes(30)
+grafo.guardar("Dorogovstev-Mendes/DorogovtsevMendes_30")
+crear_arboles_FS("Dorogovstev-Mendes/DorogovtsevMendes_30", grafo, 15)
+grafo = pgrafos.Grafo.generar_DorogovtsevMendes(100)
+grafo.guardar("Dorogovstev-Mendes/DorogovtsevMendes_100")
+crear_arboles_FS("Dorogovstev-Mendes/DorogovtsevMendes_100", grafo, 50)
+grafo = pgrafos.Grafo.generar_DorogovtsevMendes(500)
+grafo.guardar("Dorogovstev-Mendes/DorogovtsevMendes_500")
+crear_arboles_FS("Dorogovstev-Mendes/DorogovtsevMendes_500", grafo, 250)
+
+grafo = pgrafos.Grafo.generar_ErdosRenyi(30, 20)
+grafo.guardar("Erdos-Renyi/ErdosRenyi_30")
+crear_arboles_FS("Erdos-Renyi/ErdosRenyi_30", grafo, 15)
+grafo = pgrafos.Grafo.generar_ErdosRenyi(100, 80)
+grafo.guardar("Erdos-Renyi/ErdosRenyi_100")
+crear_arboles_FS("Erdos-Renyi/ErdosRenyi_100", grafo, 50)
+grafo = pgrafos.Grafo.generar_ErdosRenyi(500, 350)
+grafo.guardar("Erdos-Renyi/ErdosRenyi_500")
+crear_arboles_FS("Erdos-Renyi/ErdosRenyi_500", grafo, 250)
+
+grafo = pgrafos.Grafo.generar_geo_simple(30, 0.001)
+grafo.guardar("geografico/geografico_30")
+crear_arboles_FS("geografico/geografico_30", grafo, 15)
+grafo = pgrafos.Grafo.generar_geo_simple(100, 0.001)
+grafo.guardar("geografico/geografico_100")
+crear_arboles_FS("geografico/geografico_100", grafo, 50)
+grafo = pgrafos.Grafo.generar_geo_simple(500, 0.001)
+grafo.guardar("geografico/geografico_500")
+crear_arboles_FS("geografico/geografico_500", grafo, 250)
+
+grafo = pgrafos.Grafo.generar_Gilbert(30, 0.3)
+grafo.guardar("Gilbert/gilbert_30")
+crear_arboles_FS("Gilbert/gilbert_30", grafo, 15)
+grafo = pgrafos.Grafo.generar_Gilbert(100, 0.3)
+grafo.guardar("Gilbert/gilbert_100")
+crear_arboles_FS("Gilbert/gilbert_100", grafo, 50)
+grafo = pgrafos.Grafo.generar_Gilbert(500, 0.3)
+grafo.guardar("Gilbert/gilbert_500")
+crear_arboles_FS("Gilbert/gilbert_500", grafo, 250)
+
+grafo = pgrafos.Grafo.generar_malla(3, 10)
+grafo.guardar("malla/malla_30")
+crear_arboles_FS("malla/malla_30", grafo, 15)
+grafo = pgrafos.Grafo.generar_malla(25, 4)
+grafo.guardar("malla/malla_100")
+crear_arboles_FS("malla/malla_100", grafo, 50)
+grafo = pgrafos.Grafo.generar_malla(25, 20)
+grafo.guardar("malla/malla_500")
+crear_arboles_FS("malla/malla_500", grafo, 250)
