@@ -135,19 +135,30 @@ class Grafo:
 
     def DFS_recursivo(self, s):
         """
-        Genera un grafo con el árbol inducido por el algorítmo de búsqueda "Depth First Search" de manera iterativa.
+        Genera un grafo con el árbol inducido por el algorítmo de búsqueda "Depth First Search" de manera recursiva y
+        limpia el árbol de las propiedades "visitado".
         :param s: ID del nodo de inicio. 
         :return: Grafo
+        """
+        arbol = self.DFS_llamada_recursiva(s)
+        for nodo in self.nodos:
+            nodo.propiedad.pop("dfs_visitado", "")
+        return arbol
+
+    
+    def DFS_llamada_recursiva(self, s):
+        """
+        No invocar directamente. Para generar el DFS de manera recursiva utilice el método "DFS_recursivo".
         """
         if(self.get_nodo(s) is None):
             return None
         nodo_origen = self.get_nodo(s)
-        nodo_origen.definir_propiedad("visitado", True)
+        nodo_origen.definir_propiedad("dfs_visitado", True)
         arbol = Grafo(self.es_dirigido)
         arbol.copiar_nodo(nodo_origen)        
         for vecino in nodo_origen.vecinos:
-            if not vecino[0].propiedad.get("visitado", False):
-                arbol.nodos.extend(self.DFS_recursivo(vecino[0].identificador).nodos)
+            if not vecino[0].propiedad.get("dfs_visitado", False):
+                arbol.nodos.extend(self.DFS_llamada_recursiva(vecino[0].identificador).nodos)
                 arbol.conectar_nodos(s, vecino[0].identificador)
         return arbol
 
