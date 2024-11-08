@@ -302,7 +302,7 @@ class Grafo:
         conector = "--"
 
         if not os.path.exists(ruta):
-            print("No se encuentra el archivo de grafo especificado.")
+            print("No se encuentra el archivo de grafo especificado. (" + str(ruta) + ")")
             return grafo
         
         with open(ruta) as archivo:
