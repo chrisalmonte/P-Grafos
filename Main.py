@@ -1,43 +1,24 @@
 import pgrafos
 
-grafo = pgrafos.Grafo.generar_DorogovtsevMendes(30)
-grafo.guardar("DorogovtsevMendes_30")
-grafo = pgrafos.Grafo.generar_DorogovtsevMendes(100)
-grafo.guardar("DorogovtsevMendes_100")
-grafo = pgrafos.Grafo.generar_DorogovtsevMendes(500)
-grafo.guardar("DorogovtsevMendes_500", "grafoPrueba")
+def crear_fs(archivo_base):
+    for i in range(3):
+        if i == 0:
+            ruta = archivo_base + "_30"
+        elif i == 1:
+            ruta = archivo_base + "_100"
+        else:
+            ruta = archivo_base + "_500"
+        grafo = pgrafos.Grafo.generar_desde_archivo( "grafos/" + ruta + ".gv")
+        grafo_fs = grafo.BFS("15")
+        grafo_fs.guardar(ruta + "_BFS")
+        grafo_fs = grafo.DFS_iterativo("15")
+        grafo_fs.guardar(ruta + "_DFSi")
+        grafo_fs = grafo.DFS_recursivo("15")
+        grafo_fs.guardar(ruta + "_DFSr")
 
-grafo = pgrafos.Grafo.generar_BarbasiAlbert_variante(30, 4)
-grafo.guardar("BarbasiAlbert_variante_30")
-grafo = pgrafos.Grafo.generar_BarbasiAlbert_variante(100, 4)
-grafo.guardar("BarbasiAlbert_variante_100")
-grafo = pgrafos.Grafo.generar_BarbasiAlbert_variante(500, 4)
-grafo.guardar("BarbasiAlbert_variante_500")
-
-grafo = pgrafos.Grafo.generar_ErdosRenyi(30, 40)
-grafo.guardar("ErdosRenyi_30")
-grafo = pgrafos.Grafo.generar_ErdosRenyi(100, 40)
-grafo.guardar("ErdosRenyi_100")
-grafo = pgrafos.Grafo.generar_ErdosRenyi(500, 40)
-grafo.guardar("ErdosRenyi_500")
-
-grafo = pgrafos.Grafo.generar_geo_simple(30, 0.3)
-grafo.guardar("geografico_30")
-grafo = pgrafos.Grafo.generar_geo_simple(100, 0.3)
-grafo.guardar("geografico_100")
-grafo = pgrafos.Grafo.generar_geo_simple(500, 0.3)
-grafo.guardar("geografico_500")
-
-grafo = pgrafos.Grafo.generar_Gilbert(30, 0.3)
-grafo.guardar("gilbert_30")
-grafo = pgrafos.Grafo.generar_Gilbert(100, 0.3)
-grafo.guardar("gilbert_100")
-grafo = pgrafos.Grafo.generar_Gilbert(500, 0.3)
-grafo.guardar("gilbert_500")
-
-grafo = pgrafos.Grafo.generar_malla(10, 3)
-grafo.guardar("malla_30")
-grafo = pgrafos.Grafo.generar_malla(10, 10)
-grafo.guardar("malla_100")
-grafo = pgrafos.Grafo.generar_malla(50, 10)
-grafo.guardar("malla_500")
+crear_fs("Barbasi-Albert/BarbasiAlbert_variante")
+crear_fs("Dorogovstev-Mendes/DorogovtsevMendes")
+crear_fs("Erdos-Renyi/ErdosRenyi")
+crear_fs("geografico/geografico")
+crear_fs("Gilbert/gilbert")
+crear_fs("malla/malla")
