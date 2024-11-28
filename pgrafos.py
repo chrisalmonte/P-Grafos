@@ -78,13 +78,13 @@ class Grafo:
                     archivo.write(" [" if nodo.propiedad else "")
                     for propiedad in nodo.propiedad:
                         archivo.write(" " + str(propiedad) + "=" + str(nodo.propiedad[propiedad]) + " ")
-                    archivo.write("]" if nodo.propiedad else "")
-                    archivo.write("\n")
+                    archivo.write("]\n" if nodo.propiedad else "\n")
                 for vecino in nodo.vecinos:
                         archivo.write(str(nodo) + (" -> " if self.es_dirigido else " -- ") + str(vecino[0]))
+                        archivo.write(" [" if nodo.propiedad else "")
                         for propiedad in vecino[1].propiedad:
-                            archivo.write(" [" + str(propiedad) + "=" + str(vecino[1].propiedad[propiedad]) + "] ")
-                        archivo.write("\n")
+                            archivo.write(" " + str(propiedad) + "=" + str(vecino[1].propiedad[propiedad]) + " ")
+                        archivo.write("]\n" if nodo.propiedad else "\n")
             archivo.write("}\n")
     
     def BFS(self, s):
