@@ -1,6 +1,7 @@
 import random
 import math
 import os
+from copy import deepcopy
 
 class Grafo:
     def __init__(self, es_dirigido):
@@ -71,12 +72,17 @@ class Grafo:
 
         with open(nombre_archivo + ".gv", 'w') as archivo:
             archivo.write(("digraph " if self.es_dirigido else "graph ") + ((identificador + " {") if identificador else "{") + '\n')
-            for nodo in self.nodos:
-                if len(nodo.vecinos) == 0:
-                    archivo.write(str(nodo) + ";\n")
-                else:
-                    for vecino in nodo.vecinos:
-                        archivo.write(str(nodo) + (" -> " if self.es_dirigido else " -- ") + str(vecino[0]) + '\n')
+            for nodo in self.nodos:            
+                if len(nodo.vecinos) == 0 or len(nodo.propiedad) > 0:
+                    archivo.write(str(nodo) + ";")
+                    for propiedad in nodo.propiedad:
+                        archivo.write(" [" + str(propiedad) + "=" + str(nodo.propiedad[propiedad]) + "] ")
+                    archivo.write("\n")
+                for vecino in nodo.vecinos:
+                        archivo.write(str(nodo) + (" -> " if self.es_dirigido else " -- ") + str(vecino[0]))
+                        for propiedad in vecino[1].propiedad:
+                            archivo.write(" [" + str(propiedad) + "=" + str(vecino[1].propiedad[propiedad]) + "] ")
+                        archivo.write("\n")
             archivo.write("}\n")
     
     def BFS(self, s):
@@ -161,6 +167,49 @@ class Grafo:
                 arbol.nodos.extend(self.DFS_llamada_recursiva(vecino[0].identificador).nodos)
                 arbol.conectar_nodos(s, vecino[0].identificador)
         return arbol
+    
+    def dijkstra(self, s):
+        """
+        Genera un grafo generado con el algorítmo de Dijkstra, en el que se etiqueta cada nodo con las distancias a partir de el nodo s.
+        Requiere de la propiedad en las aristas llamadas "distancia", de otra forma se tomará como 0.
+        
+        Parameters:
+            s (Any): ID del nodo de inicio.
+        Returns:
+          grafos (tuple): Tupla donde el elemento [0] es una copia del grafo etiquetado con las distancias y [1] el árbol inducido.
+        """
+        if(self.get_nodo(s) is None):
+            return None
+        dijkstra = deepcopy(self)
+        arbol = Grafo(self.es_dirigido)
+        for nodo in dijkstra.nodos:
+            nodo.definir_propiedad("dja_distancia_min", math.inf)
+            nodo.definir_propiedad("dja_calculado", False)
+            nodo.definir_propiedad("dja_descubierto", False)
+        nodo_s = dijkstra.get_nodo(s)
+        nodo_s.definir_propiedad("color", "red")
+        nodo_s.definir_propiedad("dja_distancia_min", 0)
+
+        capas = [[nodo_s]]
+        for capa in capas:
+            capas.append([])
+            for nodo_a_calcular in capa:
+                if not nodo_a_calcular.propiedad["dja_calculado"]:
+                    for vecino in nodo_a_calcular.vecinos:
+                        if not vecino[0].propiedad["dja_calculado"]:
+                            vecino[0].definir_propiedad("dja_distancia_min", min(vecino[0].propiedad["dja_distancia_min"], (nodo_a_calcular.propiedad["dja_distancia_min"] + vecino[1].propiedad.get("distancia", 0))))
+                            if not vecino[0].propiedad["dja_descubierto"]:
+                                capas[-1].append(vecino[0])
+                                vecino[0].definir_propiedad("dja_descubierto", True)
+                nodo_a_calcular.definir_propiedad("dja_calculado", True)
+            if not capas[-1]:
+                capas.pop()
+        for nodo in dijkstra.nodos:
+            nodo.propiedad.pop("dja_calculado", "")
+            nodo.propiedad.pop("dja_descubierto", "")
+        return (dijkstra, arbol)
+        
+        
 
     @classmethod
     def generar_malla(cls, n, m, es_dirigido = False):
