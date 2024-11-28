@@ -73,10 +73,12 @@ class Grafo:
         with open(nombre_archivo + ".gv", 'w') as archivo:
             archivo.write(("digraph " if self.es_dirigido else "graph ") + ((identificador + " {") if identificador else "{") + '\n')
             for nodo in self.nodos:            
-                if len(nodo.vecinos) == 0 or len(nodo.propiedad) > 0:
+                if len(nodo.vecinos) == 0 or nodo.propiedad:
                     archivo.write(str(nodo) + ";")
+                    archivo.write(" [" if nodo.propiedad else "")
                     for propiedad in nodo.propiedad:
-                        archivo.write(" [" + str(propiedad) + "=" + str(nodo.propiedad[propiedad]) + "] ")
+                        archivo.write(" " + str(propiedad) + "=" + str(nodo.propiedad[propiedad]) + " ")
+                    archivo.write("]" if nodo.propiedad else "")
                     archivo.write("\n")
                 for vecino in nodo.vecinos:
                         archivo.write(str(nodo) + (" -> " if self.es_dirigido else " -- ") + str(vecino[0]))
