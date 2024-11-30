@@ -30,6 +30,25 @@ class Grafo:
         if not self.es_dirigido:
             nodo_a.conectar_a(nodo_de, arista)
 
+    def desconectar_nodos(self, id_de, id_a):
+        """Elimina la arista entre los nodos."""
+        nodo_de = self.get_nodo(id_de)
+        nodo_a = self.get_nodo(id_a)
+        if nodo_de is None or nodo_a is None:
+            return        
+        for i in range(len(nodo_de.vecinos)):
+            if nodo_de.vecinos[i][0].identificador == id_a:
+                nodo_de.vecinos.pop(i)
+                if not self.es_dirigido:
+                    for j in range(len(nodo_a.vecinos)):
+                        if nodo_a.vecinos[j][0].identificador == id_de:
+                            nodo_a.vecinos.pop(j)
+                            break
+                break
+        for i in range(len(self.aristas)):
+            if self.aristas[i].extremos[0] == id_de and self.aristas[i].extremos[1] == id_a:
+                self.aristas.pop(i) 
+
     def get_nodo(self, id):
         """
         Devuelve el nodo con el ID especificado o None si no existe.
@@ -81,11 +100,28 @@ class Grafo:
                     archivo.write("]\n" if nodo.propiedad else "\n")
                 for vecino in nodo.vecinos:
                         archivo.write(str(nodo) + (" -> " if self.es_dirigido else " -- ") + str(vecino[0]))
-                        archivo.write(" [" if nodo.propiedad else "")
+                        archivo.write(" [" if vecino[1].propiedad else "")
                         for propiedad in vecino[1].propiedad:
                             archivo.write(" " + str(propiedad) + "=" + str(vecino[1].propiedad[propiedad]) + " ")
-                        archivo.write("]\n" if nodo.propiedad else "\n")
+                        archivo.write("]\n" if vecino[1].propiedad else "\n")
             archivo.write("}\n")
+
+    def esta_conectado(self, arista_a_remover=None):
+        if not self.nodos:
+            return True
+        nodos_visitados = []
+        if arista_a_remover is None:
+            grafo = self 
+        else: 
+            grafo = deepcopy(self)
+            grafo.desconectar_nodos(arista_a_remover.extremos[0].identificador, arista_a_remover.extremos[1].identificador)
+        nodos_visitados.append(grafo.nodos[0])
+        for nodo in nodos_visitados:
+            for vecino in nodo.vecinos:
+                if vecino[0] not in nodos_visitados:
+                    nodos_visitados.append(vecino[0])
+        return len(nodos_visitados) == len(grafo.nodos)
+
     
     def BFS(self, s):
         """
@@ -170,15 +206,13 @@ class Grafo:
                 arbol.conectar_nodos(s, vecino[0].identificador)
         return arbol
     
-    def dijkstra(self, s):
+    def Dijkstra(self, s):
         """
         Genera un grafo generado con el algorítmo de Dijkstra, en el que se etiqueta cada nodo con las distancias a partir de el nodo s.
         Requiere de la propiedad en las aristas llamadas "distancia", de otra forma se tomará como 0.
         
-        Parameters:
-            s (Any): ID del nodo de inicio.
-        Returns:
-          grafos (tuple): Tupla donde el elemento [0] es una copia del grafo etiquetado con las distancias y [1] el árbol inducido.
+        :param s: ID del nodo de inicio.
+        :return: tuple: Tupla donde el elemento [0] es una copia del grafo etiquetado con las distancias y [1] el árbol inducido.
         """
         if(self.get_nodo(s) is None):
             return None
@@ -218,7 +252,28 @@ class Grafo:
                 arbol.conectar_nodos(anterior, nodo.identificador, distancia=dist_anterior)
         return (dijkstra, arbol)
         
+    def KruskalI(self):
+        """
+        Calcula el árbol de expansión mínima usando el algoritmo de Kruskal Inverso
         
+        :return: tuple: Tupla donde el elemento [0] es el árbol de expansión mínima y [1] es su peso total.
+        """
+        mst = deepcopy(self)
+        mst.aristas.sort(key=Grafo.get_distancia_arista, reverse=True)
+        peso_total = 0
+        for arista in mst.aristas:
+            if mst.esta_conectado(arista_a_remover=arista):
+                mst.desconectar_nodos(arista.extremos[0].identificador, arista.extremos[1].identificador)
+            else:
+                peso_total += arista.propiedad.get("distancia", 0)
+        return (mst, peso_total)
+
+    def get_distancia_arista(arista):
+        """
+        Para uso interno de los algoritmos en la clase. 
+        Si desea consultar una propiedad, obtenga el valor directamente del diccionario Arista.propiedad (Arista.propiedad.get())
+        """
+        return arista.propiedad.get("distancia", 0)
 
     @classmethod
     def generar_malla(cls, n, m, es_dirigido = False):
@@ -405,7 +460,7 @@ class Nodo:
         for vecino in self.vecinos:
             if nodo is vecino[0]:
                 self.vecinos.remove(vecino)
-        arista.definir_extremos(self.identificador, nodo.identificador)
+        arista.definir_extremos(self, nodo)
         self.vecinos.append((nodo, arista))
 
     def definir_propiedad(self, llave, valor):
@@ -418,15 +473,15 @@ class Nodo:
 class Arista:
     def __init__(self, **kwargs):
         self.propiedad = {}
-        self.extremos = ("", "")
+        self.extremos = (None, None)
         for llave, valor in kwargs.items():
                 self.propiedad[llave] = valor
     
     def __str__(self):
         return str(self.extremos[0]) + " --> " + str(self.extremos[1])
 
-    def definir_extremos(self, id_nodo_de, id_nodo_a):
-        self.extremos = (id_nodo_de, id_nodo_a)
+    def definir_extremos(self, nodo_de, nodo_a):
+        self.extremos = (nodo_de, nodo_a)
 
     def definir_propiedad(self, llave, valor):
         """
