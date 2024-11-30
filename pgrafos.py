@@ -184,31 +184,38 @@ class Grafo:
             return None
         dijkstra = deepcopy(self)
         arbol = Grafo(self.es_dirigido)
+        nodo_s = dijkstra.get_nodo(s)
+        nodo_s.definir_propiedad("color", "red")
         for nodo in dijkstra.nodos:
+            arbol.copiar_nodo(nodo)
             nodo.definir_propiedad("dja_distancia_min", math.inf)
             nodo.definir_propiedad("dja_calculado", False)
             nodo.definir_propiedad("dja_descubierto", False)
-        nodo_s = dijkstra.get_nodo(s)
-        nodo_s.definir_propiedad("color", "red")
+            nodo.definir_propiedad("dja_anterior", None)
+            nodo.definir_propiedad("dja_dist_anterior", 0)
         nodo_s.definir_propiedad("dja_distancia_min", 0)
-
-        capas = [[nodo_s]]
-        for capa in capas:
-            capas.append([])
-            for nodo_a_calcular in capa:
-                if not nodo_a_calcular.propiedad["dja_calculado"]:
-                    for vecino in nodo_a_calcular.vecinos:
-                        if not vecino[0].propiedad["dja_calculado"]:
-                            vecino[0].definir_propiedad("dja_distancia_min", min(vecino[0].propiedad["dja_distancia_min"], (nodo_a_calcular.propiedad["dja_distancia_min"] + vecino[1].propiedad.get("distancia", 0))))
-                            if not vecino[0].propiedad["dja_descubierto"]:
-                                capas[-1].append(vecino[0])
-                                vecino[0].definir_propiedad("dja_descubierto", True)
-                nodo_a_calcular.definir_propiedad("dja_calculado", True)
-            if not capas[-1]:
-                capas.pop()
+        nodos_descubiertos = [nodo_s]
+        for nodo_a_calcular in nodos_descubiertos:
+            if not nodo_a_calcular.propiedad["dja_calculado"]:
+                for vecino in nodo_a_calcular.vecinos:
+                    if not vecino[0].propiedad["dja_calculado"]:
+                        distancia = nodo_a_calcular.propiedad["dja_distancia_min"] + vecino[1].propiedad.get("distancia", 0)
+                        if distancia < vecino[0].propiedad["dja_distancia_min"]:
+                            vecino[0].definir_propiedad("dja_distancia_min", distancia)
+                            vecino[0].definir_propiedad("dja_anterior", nodo_a_calcular.identificador)
+                            vecino[0].definir_propiedad("dja_dist_anterior", vecino[1].propiedad.get("distancia", 0))
+                        if not vecino[0].propiedad["dja_descubierto"]:
+                            nodos_descubiertos.append(vecino[0])
+                            vecino[0].definir_propiedad("dja_descubierto", True)
+            nodo_a_calcular.definir_propiedad("dja_calculado", True)
         for nodo in dijkstra.nodos:
             nodo.propiedad.pop("dja_calculado", "")
             nodo.propiedad.pop("dja_descubierto", "")
+            dist_anterior = nodo.propiedad.pop("dja_dist_anterior", 0)
+            anterior = nodo.propiedad.pop("dja_anterior", None)
+            arbol.get_nodo(nodo.identificador).definir_propiedad("dja_distancia_min", nodo.propiedad["dja_distancia_min"])
+            if (anterior is not None):
+                arbol.conectar_nodos(anterior, nodo.identificador, distancia=dist_anterior)
         return (dijkstra, arbol)
         
         
