@@ -267,6 +267,24 @@ class Grafo:
             else:
                 peso_total += arista.propiedad.get("distancia", 0)
         return (mst, peso_total)
+    
+    def KruskalD(self):
+        """
+        Calcula el árbol de expansión mínima usando el algoritmo de Kruskal Directo
+        
+        :return: tuple: Tupla donde el elemento [0] es el árbol de expansión mínima y [1] es su peso total.
+        """
+        mst = Grafo(False)
+        aristas = self.aristas
+        aristas.sort(key=Grafo.get_distancia_arista)
+        peso_total = 0
+        for nodo in self.nodos:
+            mst.copiar_nodo(nodo)
+        for arista in aristas:
+            if not mst.es_ciclico(arista_a_agregar=arista):
+                mst.conectar_nodos(arista.extremos[0].identificador, arista.extremos[1].identificador, distancia=arista.propiedad.get("distancia", 0))
+                peso_total += arista.propiedad.get("distancia", 0)
+        return (mst, peso_total)
 
     def get_distancia_arista(arista):
         """
@@ -274,6 +292,26 @@ class Grafo:
         Si desea consultar una propiedad, obtenga el valor directamente del diccionario Arista.propiedad (Arista.propiedad.get())
         """
         return arista.propiedad.get("distancia", 0)
+    
+    def es_ciclico(self, arista_a_agregar=None):
+        """Indica si el grafo contiene almenos un ciclo"""
+        if not self.nodos:
+            return False
+        grafo = deepcopy(self)
+        if arista_a_agregar is not None:
+            grafo.conectar_nodos(arista_a_agregar.extremos[0].identificador, arista_a_agregar.extremos[1].identificador)
+        visitados = [grafo.nodos[0]]
+        visitados[0].definir_propiedad("ec_visitado", True)
+        for nodo in visitados:
+            for vecino in nodo.vecinos:
+                if not vecino[1].propiedad.get("ce_recorrida", False):
+                    vecino[1].definir_propiedad("ce_recorrida", True)
+                    if not vecino[0].propiedad.get("ec_visitado", False):
+                        vecino[0].definir_propiedad("ec_visitado", True)
+                        visitados.append(vecino[0])
+                    else:
+                        return True
+        return False
 
     @classmethod
     def generar_malla(cls, n, m, es_dirigido = False):
