@@ -107,6 +107,11 @@ class Grafo:
             archivo.write("}\n")
 
     def esta_conectado(self, arista_a_remover=None):
+        """
+        Indica si el grafo está conectado.
+
+        :param arista_a_remover: Arista que se ignora al evaluar el grafo, sin removerla del original.
+        """
         if not self.nodos:
             return True
         nodos_visitados = []
@@ -294,7 +299,11 @@ class Grafo:
         return arista.propiedad.get("distancia", 0)
     
     def es_ciclico(self, arista_a_agregar=None):
-        """Indica si el grafo contiene almenos un ciclo"""
+        """
+        Indica si el grafo contiene almenos un ciclo
+        
+        :param arista_a_agregar: Arista adicional con la que se evalua el grafo, sin agregarla al original.
+        """
         if not self.nodos:
             return False
         grafo = deepcopy(self)
