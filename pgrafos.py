@@ -304,45 +304,38 @@ class Grafo:
 
         :return: Tupla donde el elemento [0] es el árbol de expansión mínima y [1] es su peso total.
         """
+        if not self.nodos:
+            return None
+        aristas_candidato = []
         arbol = Grafo(False)
-        arbol.copiar_nodo(self.nodos[0])
         peso = 0
-        aristas_alt = []
+        arbol.copiar_nodo(self.nodos[0])
+        aristas_candidato.extend(self.nodos[0].vecinos)
 
-        new_nodo = self.nodos[0]
-
-        #Tomar nodo
-        #marcarlo como visitado
-        #ver todas sus aristas
-        #agregar las que no esten a la lista
-        #elegir la más pequeña y que vaya a un nodo no contenido en el árbol
-        #conectar los nodos
-        #sumar el peso
-        #sacarla de la lista
-        #nodo saliente es nuevo nodo
-
-        while new_nodo is not None:
-            new_nodo.definir_propiedad("prim_visitado", True)
-            for vecino in new_nodo.vecinos:
-                if not vecino[1].propiedad.get("prim_en_lista", False):
-                    vecino[1].definir_propiedad("prim_en_lista", True)
-                    aristas_alt.append(vecino[1])
+        while aristas_candidato:            
+            index_mas_corta = -1
             min_peso = math.inf
-            index_min_peso = -1            
-            for i in range(len(aristas_alt)):
-                if aristas_alt[i].propiedad.get("distancia", 0) < min_peso:
-                    min_peso = aristas_alt[i].propiedad.get("distancia", 0)
-                    index_min_peso = i
-            if index_min_peso < 0:
-                new_nodo = None
-            else:
-                sig_nodo = aristas_alt[index_min_peso].extremos[0] if aristas_alt[i].extremos[1].identificador == new_nodo.identificador else aristas_alt[index_min_peso].extremos[1]
-                arbol.copiar_nodo(sig_nodo)
-                arbol.conectar_nodos(new_nodo.identificador, sig_nodo.identificador, distancia=min_peso)
+            for i in range(len(aristas_candidato)):
+                if (arbol.get_nodo(aristas_candidato[i][0].identificador) is None) and aristas_candidato[i][1].propiedad.get("distancia", 0) < min_peso:
+                    index_mas_corta = i
+                    min_peso = aristas_candidato[i][1].propiedad.get("distancia", 0) 
+            if index_mas_corta > -1:
+                arbol.copiar_nodo(aristas_candidato[index_mas_corta][0])
+                arbol.conectar_nodos(aristas_candidato[index_mas_corta][1].extremos[0].identificador,aristas_candidato[index_mas_corta][1].extremos[1].identificador, distancia=min_peso)
                 peso += min_peso
-                aristas_alt.pop(index_min_peso)
-                new_nodo = sig_nodo
-        return(arbol, peso)
+                for vecino in aristas_candidato[index_mas_corta][0].vecinos:
+                    if arbol.get_nodo(vecino[0].identificador) is None:
+                        aristas_candidato.append(vecino)
+                aristas_candidato.pop(index_mas_corta)
+            a_remover = []
+            for i in range(len(aristas_candidato)):
+                if arbol.get_nodo(aristas_candidato[i][0].identificador) is not None:
+                    a_remover.append(i)
+            contador = 0
+            for i in a_remover:
+                aristas_candidato.pop(i - contador)
+                contador += 1
+        return(arbol, peso)        
 
     def get_distancia_arista(arista):
         """
