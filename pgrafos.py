@@ -3,6 +3,10 @@ import math
 import os
 from copy import deepcopy
 
+#TODO: 
+# Regresar Falso cuando el grafo es no dirigido y los algoritmos no lo soportan.
+# Ver si el grafo no contiene 0 nodos y regresar none
+
 class Grafo:
     def __init__(self, es_dirigido):
         self.es_dirigido = es_dirigido
@@ -214,7 +218,7 @@ class Grafo:
     def Dijkstra(self, s):
         """
         Genera un grafo generado con el algorítmo de Dijkstra, en el que se etiqueta cada nodo con las distancias a partir de el nodo s.
-        Requiere de la propiedad en las aristas llamadas "distancia", de otra forma se tomará como 0.
+        Requiere de la propiedad "distancia" en las aristas, de otra forma se tomará el valor como 0.
         
         :param s: ID del nodo de inicio.
         :return: tuple: Tupla donde el elemento [0] es una copia del grafo etiquetado con las distancias y [1] el árbol inducido.
@@ -259,7 +263,8 @@ class Grafo:
         
     def KruskalI(self):
         """
-        Calcula el árbol de expansión mínima usando el algoritmo de Kruskal Inverso
+        Calcula el árbol de expansión mínima usando el algoritmo de Kruskal Inverso.
+        Requiere de la propiedad "distancia" en las aristas, de otra forma se tomará el valor como 0.
         
         :return: tuple: Tupla donde el elemento [0] es el árbol de expansión mínima y [1] es su peso total.
         """
@@ -275,7 +280,8 @@ class Grafo:
     
     def KruskalD(self):
         """
-        Calcula el árbol de expansión mínima usando el algoritmo de Kruskal Directo
+        Calcula el árbol de expansión mínima usando el algoritmo de Kruskal Directo.
+        Requiere de la propiedad "distancia" en las aristas, de otra forma se tomará el valor como 0.
         
         :return: tuple: Tupla donde el elemento [0] es el árbol de expansión mínima y [1] es su peso total.
         """
@@ -283,43 +289,97 @@ class Grafo:
         aristas = self.aristas
         aristas.sort(key=Grafo.get_distancia_arista)
         peso_total = 0
-        for nodo in self.nodos:
-            mst.copiar_nodo(nodo)
         for arista in aristas:
-            if not mst.es_ciclico(arista_a_agregar=arista):
+            if not (mst.hay_ciclo_desde(arista.extremos[0].identificador, arista_a_agregar=arista) or mst.hay_ciclo_desde(arista.extremos[1].identificador, arista_a_agregar=arista)):
+                mst.copiar_nodo(arista.extremos[0])
+                mst.copiar_nodo(arista.extremos[1])
                 mst.conectar_nodos(arista.extremos[0].identificador, arista.extremos[1].identificador, distancia=arista.propiedad.get("distancia", 0))
                 peso_total += arista.propiedad.get("distancia", 0)
         return (mst, peso_total)
+    
+    def Prim(self):
+        """
+        Calcula el árbol de expansión mínima usando el algoritmo de Prim.
+        Requiere de la propiedad "distancia" en las aristas, de otra forma se tomará el valor como 0.
+
+        :return: Tupla donde el elemento [0] es el árbol de expansión mínima y [1] es su peso total.
+        """
+        arbol = Grafo(False)
+        arbol.copiar_nodo(self.nodos[0])
+        peso = 0
+        aristas_alt = []
+
+        new_nodo = self.nodos[0]
+
+        #Tomar nodo
+        #marcarlo como visitado
+        #ver todas sus aristas
+        #agregar las que no esten a la lista
+        #elegir la más pequeña y que vaya a un nodo no contenido en el árbol
+        #conectar los nodos
+        #sumar el peso
+        #sacarla de la lista
+        #nodo saliente es nuevo nodo
+
+        while new_nodo is not None:
+            new_nodo.definir_propiedad("prim_visitado", True)
+            for vecino in new_nodo.vecinos:
+                if not vecino[1].propiedad.get("prim_en_lista", False):
+                    vecino[1].definir_propiedad("prim_en_lista", True)
+                    aristas_alt.append(vecino[1])
+            min_peso = math.inf
+            index_min_peso = -1            
+            for i in range(len(aristas_alt)):
+                if aristas_alt[i].propiedad.get("distancia", 0) < min_peso:
+                    min_peso = aristas_alt[i].propiedad.get("distancia", 0)
+                    index_min_peso = i
+            if index_min_peso < 0:
+                new_nodo = None
+            else:
+                sig_nodo = aristas_alt[index_min_peso].extremos[0] if aristas_alt[i].extremos[1].identificador == new_nodo.identificador else aristas_alt[index_min_peso].extremos[1]
+                arbol.copiar_nodo(sig_nodo)
+                arbol.conectar_nodos(new_nodo.identificador, sig_nodo.identificador, distancia=min_peso)
+                peso += min_peso
+                aristas_alt.pop(index_min_peso)
+                new_nodo = sig_nodo
+        return(arbol, peso)
 
     def get_distancia_arista(arista):
         """
-        Para uso interno de los algoritmos en la clase. 
+        Función para ordenar las aristas por distancia usando list.sort. 
         Si desea consultar una propiedad, obtenga el valor directamente del diccionario Arista.propiedad (Arista.propiedad.get())
         """
         return arista.propiedad.get("distancia", 0)
     
-    def es_ciclico(self, arista_a_agregar=None):
+    def hay_ciclo_desde(self, s, arista_a_agregar=None):
         """
-        Indica si el grafo contiene almenos un ciclo
+        Indica si el grafo contiene almenos un ciclo desde el nodo indicado.
         
+        :param s: Nodo desde donde se evalua el ciclo.
         :param arista_a_agregar: Arista adicional con la que se evalua el grafo, sin agregarla al original.
         """
-        if not self.nodos:
+        if self.get_nodo(s) is None:
             return False
         grafo = deepcopy(self)
         if arista_a_agregar is not None:
             grafo.conectar_nodos(arista_a_agregar.extremos[0].identificador, arista_a_agregar.extremos[1].identificador)
-        visitados = [grafo.nodos[0]]
-        visitados[0].definir_propiedad("ec_visitado", True)
-        for nodo in visitados:
-            for vecino in nodo.vecinos:
+        descubiertos = [grafo.get_nodo(s)]
+        index_nodo_raiz = 0
+        nodo_siguiente = None
+        while index_nodo_raiz > -1:
+            nodo_siguiente = None
+            for vecino in descubiertos[index_nodo_raiz].vecinos:
                 if not vecino[1].propiedad.get("ce_recorrida", False):
                     vecino[1].definir_propiedad("ce_recorrida", True)
-                    if not vecino[0].propiedad.get("ec_visitado", False):
-                        vecino[0].definir_propiedad("ec_visitado", True)
-                        visitados.append(vecino[0])
+                    if (vecino[0] not in descubiertos):
+                        descubiertos.insert(index_nodo_raiz + 1, vecino[0])
+                        index_nodo_raiz += 1
+                        nodo_siguiente = vecino[0]
+                        break
                     else:
                         return True
+            if (nodo_siguiente is None):
+                index_nodo_raiz = (index_nodo_raiz - 1)
         return False
 
     @classmethod
