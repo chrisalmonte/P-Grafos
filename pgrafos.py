@@ -1,7 +1,6 @@
 import random
 import math
 import os
-from copy import deepcopy
 
 #TODO: 
 # Regresar Falso cuando el grafo es no dirigido y los algoritmos no lo soportan.
@@ -50,8 +49,9 @@ class Grafo:
                             break
                 break
         for i in range(len(self.aristas)):
-            if self.aristas[i].extremos[0] == id_de and self.aristas[i].extremos[1] == id_a:
-                self.aristas.pop(i) 
+            if self.aristas[i].extremos[0].identificador == id_de and self.aristas[i].extremos[1].identificador == id_a:
+                self.aristas.pop(i)
+                break
 
     def get_nodo(self, id):
         """
@@ -119,10 +119,8 @@ class Grafo:
         if not self.nodos:
             return True
         nodos_visitados = []
-        if arista_a_remover is None:
-            grafo = self 
-        else: 
-            grafo = deepcopy(self)
+        grafo = self if arista_a_remover is None else self.duplicar() 
+        if arista_a_remover is not None:
             grafo.desconectar_nodos(arista_a_remover.extremos[0].identificador, arista_a_remover.extremos[1].identificador)
         nodos_visitados.append(grafo.nodos[0])
         for nodo in nodos_visitados:
@@ -130,7 +128,6 @@ class Grafo:
                 if vecino[0] not in nodos_visitados:
                     nodos_visitados.append(vecino[0])
         return len(nodos_visitados) == len(grafo.nodos)
-
     
     def BFS(self, s):
         """
@@ -197,7 +194,6 @@ class Grafo:
         for nodo in self.nodos:
             nodo.propiedad.pop("dfs_visitado", "")
         return arbol
-
     
     def DFS_llamada_recursiva(self, s):
         """
@@ -225,7 +221,7 @@ class Grafo:
         """
         if(self.get_nodo(s) is None):
             return None
-        dijkstra = deepcopy(self)
+        dijkstra = self.duplicar()
         arbol = Grafo(self.es_dirigido)
         nodo_s = dijkstra.get_nodo(s)
         nodo_s.definir_propiedad("color", "red")
@@ -268,14 +264,17 @@ class Grafo:
         
         :return: tuple: Tupla donde el elemento [0] es el árbol de expansión mínima y [1] es su peso total.
         """
-        mst = deepcopy(self)
+        mst = self.duplicar()
         mst.aristas.sort(key=Grafo.get_distancia_arista, reverse=True)
         peso_total = 0
-        for arista in mst.aristas:
+        i = 0
+        while i < (len(mst.aristas)):
+            arista = mst.aristas[i]
             if mst.esta_conectado(arista_a_remover=arista):
                 mst.desconectar_nodos(arista.extremos[0].identificador, arista.extremos[1].identificador)
             else:
-                peso_total += arista.propiedad.get("distancia", 0)
+                peso_total += arista.propiedad["distancia"]
+                i += 1
         return (mst, peso_total)
     
     def KruskalD(self):
@@ -353,7 +352,7 @@ class Grafo:
         """
         if self.get_nodo(s) is None:
             return False
-        grafo = deepcopy(self)
+        grafo = self.duplicar()
         if arista_a_agregar is not None:
             grafo.conectar_nodos(arista_a_agregar.extremos[0].identificador, arista_a_agregar.extremos[1].identificador)
         descubiertos = [grafo.get_nodo(s)]
@@ -374,6 +373,15 @@ class Grafo:
             if (nodo_siguiente is None):
                 index_nodo_raiz = (index_nodo_raiz - 1)
         return False
+    
+    def duplicar(self):
+        copia = Grafo(self.es_dirigido)
+        for nodo in self.nodos:
+            copia.copiar_nodo(nodo)
+        for arista in self.aristas:
+            copia.conectar_nodos(arista.extremos[0].identificador, arista.extremos[1].identificador)
+            copia.aristas[-1].propiedad = arista.propiedad.copy()
+        return copia
 
     @classmethod
     def generar_malla(cls, n, m, es_dirigido = False):
