@@ -1,6 +1,7 @@
 #En este módulo se generan los ejemplos requeridos utilizando P-Grafos
 
 import pgrafos
+import random
 
 def crear_arboles_FS(nombre_archivo, grafo, id_nodo_s):
     grafo_fs = grafo.BFS(id_nodo_s)
@@ -9,6 +10,26 @@ def crear_arboles_FS(nombre_archivo, grafo, id_nodo_s):
     grafo_fs.guardar(nombre_archivo + "_DFSi")
     grafo_fs = grafo.DFS_recursivo(id_nodo_s)
     grafo_fs.guardar(nombre_archivo + "_DFSr")
+
+def crear_arboles_MST(nombre_archivo, grafo):
+    grafo_mst = grafo.KruskalD()
+    print("peso del MST con Kruskal de " + nombre_archivo + "  es: " + str(grafo_mst[1]))
+    grafo_mst[0].guardar(nombre_archivo + "_kruskal")
+    grafo_mst = grafo.KruskalI()
+    print("peso del MST con Kruskal Inv. de " + nombre_archivo + " es: " + str(grafo_mst[1]))
+    grafo_mst[0].guardar(nombre_archivo + "_kruskalI")
+    grafo_mst = grafo.Prim()
+    print("peso del MST con Prim de " + nombre_archivo + "  es: " + str(grafo_mst[1]))
+    grafo_mst[0].guardar(nombre_archivo + "_Prim")
+
+def crear_dijkstra(nombre_archivo, grafo, s):
+    grafo_dijkstra = grafo.Dijkstra(s)
+    grafo_dijkstra[0].guardar(nombre_archivo + "_dijkstra_etiquetado")
+    grafo_dijkstra[1].guardar(nombre_archivo + "_dijkstra_arbol")
+
+def generar_distancias_aleatorias(grafo, min, max):
+    for arista in grafo.aristas:
+        arista.definir_propiedad("distancia", random.randint(min, max))
 
 grafo = pgrafos.Grafo.generar_BarbasiAlbert_variante(30, 3)
 grafo.guardar("Barbasi-Albert/BarbasiAlbert_variante_30")
@@ -69,3 +90,70 @@ crear_arboles_FS("malla/malla_100", grafo, 50)
 grafo = pgrafos.Grafo.generar_malla(25, 20)
 grafo.guardar("malla/malla_500")
 crear_arboles_FS("malla/malla_500", grafo, 250)
+
+#Dijksta y MST
+grafo = pgrafos.Grafo.generar_malla(5,6)
+generar_distancias_aleatorias(grafo, 1, 15)
+grafo.guardar("malla/malla_pocos")
+crear_dijkstra("malla/malla_pocos", grafo, 15)
+crear_arboles_MST("malla/malla_pocos", grafo)
+grafo = pgrafos.Grafo.generar_malla(25, 10)
+generar_distancias_aleatorias(grafo, 1, 15)
+grafo.guardar("malla/malla_muchos")
+crear_dijkstra("malla/malla_muchos", grafo, 30)
+crear_arboles_MST("malla/malla_muchos", grafo)
+
+grafo = pgrafos.Grafo.generar_BarbasiAlbert_variante(30, 5)
+generar_distancias_aleatorias(grafo, 1, 15)
+grafo.guardar("Barbasi-Albert/BarbasiAlbert_variante_pocos")
+crear_dijkstra("Barbasi-Albert/BarbasiAlbert_variante_pocos", grafo, 15)
+crear_arboles_MST("Barbasi-Albert/BarbasiAlbert_variante_pocos", grafo)
+grafo = pgrafos.Grafo.generar_BarbasiAlbert_variante(250, 6)
+generar_distancias_aleatorias(grafo, 1, 15)
+grafo.guardar("Barbasi-Albert/BarbasiAlbert_variante_muchos")
+crear_dijkstra("Barbasi-Albert/BarbasiAlbert_variante_muchos", grafo, 30)
+crear_arboles_MST("Barbasi-Albert/BarbasiAlbert_variante_muchos", grafo)
+
+grafo = pgrafos.Grafo.generar_DorogovtsevMendes(30)
+generar_distancias_aleatorias(grafo, 1, 15)
+grafo.guardar("Dorogovstev-Mendes/DorogovtsevMendes_pocos")
+crear_dijkstra("Dorogovstev-Mendes/DorogovtsevMendes_pocos", grafo, 15)
+crear_arboles_MST("Dorogovstev-Mendes/DorogovtsevMendes_pocos", grafo)
+grafo = pgrafos.Grafo.generar_DorogovtsevMendes(250)
+generar_distancias_aleatorias(grafo, 1, 15)
+grafo.guardar("Dorogovstev-Mendes/DorogovtsevMendes_muchos")
+crear_dijkstra("Dorogovstev-Mendes/DorogovtsevMendes_muchos", grafo, 30)
+crear_arboles_MST("Dorogovstev-Mendes/DorogovtsevMendes_muchos", grafo)
+
+grafo = pgrafos.Grafo.generar_ErdosRenyi(30, 30)
+generar_distancias_aleatorias(grafo, 1, 15)
+grafo.guardar("Erdos-Renyi/ErdosRenyi_pocos")
+crear_dijkstra("Erdos-Renyi/ErdosRenyi_pocos", grafo, 15)
+crear_arboles_MST("Erdos-Renyi/ErdosRenyi_pocos", grafo)
+grafo = pgrafos.Grafo.generar_ErdosRenyi(250, 200)
+generar_distancias_aleatorias(grafo, 1, 15)
+grafo.guardar("Erdos-Renyi/ErdosRenyi_muchos")
+crear_dijkstra("Erdos-Renyi/ErdosRenyi_muchos", grafo, 30)
+crear_arboles_MST("Erdos-Renyi/ErdosRenyi_muchos", grafo)
+
+grafo = pgrafos.Grafo.generar_geo_simple(30, 0.05)
+generar_distancias_aleatorias(grafo, 1, 15)
+grafo.guardar("geografico/geografico_pocos")
+crear_dijkstra("geografico/geografico_pocos", grafo, 15)
+crear_arboles_MST("geografico/geografico_pocos", grafo)
+grafo = pgrafos.Grafo.generar_geo_simple(250, 0.05)
+generar_distancias_aleatorias(grafo, 1, 15)
+grafo.guardar("geografico/geografico_muchos")
+crear_dijkstra("geografico/geografico_muchos", grafo, 30)
+crear_arboles_MST("geografico/geografico_muchos", grafo)
+
+grafo = pgrafos.Grafo.generar_Gilbert(30, 0.4)
+generar_distancias_aleatorias(grafo, 1, 15)
+grafo.guardar("Gilbert/gilbert_pocos")
+crear_dijkstra("Gilbert/gilbert_pocos", grafo, 15)
+crear_arboles_MST("Gilbert/gilbert_pocos", grafo)
+grafo = pgrafos.Grafo.generar_Gilbert(250, 0.4)
+generar_distancias_aleatorias(grafo, 1, 15)
+grafo.guardar("Gilbert/gilbert_muchos")
+crear_dijkstra("Gilbert/gilbert_muchos", grafo, 30)
+crear_arboles_MST("Gilbert/gilbert_muchos", grafo)
