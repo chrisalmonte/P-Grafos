@@ -5,6 +5,7 @@ import os
 #TODO: 
 # Regresar Falso cuando el grafo es no dirigido y los algoritmos no lo soportan.
 # Ver si el grafo no contiene 0 nodos y regresar none
+# Cargar archivos con atributos
 
 class Grafo:
     """
