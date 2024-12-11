@@ -7,6 +7,15 @@ import os
 # Ver si el grafo no contiene 0 nodos y regresar none
 
 class Grafo:
+    """
+    Una clase que representa un Grafo.
+
+    Attributes:
+        es_dirigido (bool): Si es o no dirigido. No es recomendable cambiarlo arbitrariamente.
+        nodos ([Nodo]): Lista con todos los nodos del grafo.
+        aristas ([Arista]): Lista con todas las aristas del grafo.
+    """
+
     def __init__(self, es_dirigido):
         self.es_dirigido = es_dirigido
         self.nodos = []
