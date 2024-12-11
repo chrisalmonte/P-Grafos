@@ -12,12 +12,17 @@ class Grafo:
     Una clase que representa un Grafo.
 
     Attributes:
-        es_dirigido (bool): Si es o no dirigido. No es recomendable cambiarlo arbitrariamente.
-        nodos ([Nodo]): Lista con todos los nodos del grafo.
-        aristas ([Arista]): Lista con todas las aristas del grafo.
+        es_dirigido (bool): True si es dirigido, False en caso contrario. No es recomendable cambiarlo arbitrariamente.
+        nodos (list(Nodo)): Lista con todos los nodos del grafo.
+        aristas (list(Arista)): Lista con todas las aristas del grafo.
     """
 
     def __init__(self, es_dirigido):
+        """
+        Inicializa un grafo vacío.
+
+        :param bool es_dirigido: True si el grafo será dirigido. False si no.
+        """
         self.es_dirigido = es_dirigido
         self.nodos = []
         self.aristas = []
@@ -36,14 +41,14 @@ class Grafo:
         Crea una arista y conecta 2 nodos dentro del grafo tomando en cuenta si es dirigido o no.
 
         :param id_de: ID del nodo inicial. Debe ser del mismo tipo del identificador (str, int, etc..). Si no, el nodo no será encontrado.
-        :param id_de: ID del nodo terminal. Debe ser del mismo tipo del identificador (str, int, etc..). Si no, el nodo no será encontrado.
+        :param id_a: ID del nodo terminal. Debe ser del mismo tipo del identificador (str, int, etc..). Si no, el nodo no será encontrado.
         :param **kwargs: Kwargs con los atributos que contendrá la arista entre los nodos.
         """
         nodo_de = self.get_nodo(id_de)
         nodo_a = self.get_nodo(id_a)
         if nodo_de is None or nodo_a is None:
-            return
-        
+            print("ERROR: No se encuentra uno o ninguno de los nodos especificados para conectar.")
+            return        
         arista = Arista(**kwargs)
         self.aristas.append(arista)
         nodo_de.conectar_a(nodo_a, arista)
@@ -52,12 +57,15 @@ class Grafo:
 
     def desconectar_nodos(self, id_de, id_a):
         """
-        Elimina la arista entre los nodos.
-        
+        Desconecta 2 nodos dentro del grafo y elimina su arista, tomando en cuenta si es dirigido o no.
+
+        :param id_de: ID del nodo inicial. Debe ser del mismo tipo del identificador (str, int, etc..). Si no, el nodo no será encontrado.
+        :param id_a: ID del nodo terminal. Debe ser del mismo tipo del identificador (str, int, etc..). Si no, el nodo no será encontrado.
         """
         nodo_de = self.get_nodo(id_de)
         nodo_a = self.get_nodo(id_a)
         if nodo_de is None or nodo_a is None:
+            print("ERROR: No se encuentra uno o ninguno de los nodos especificados para desconectar.")
             return        
         for i in range(len(nodo_de.vecinos)):
             if nodo_de.vecinos[i][0].identificador == id_a:
@@ -76,6 +84,9 @@ class Grafo:
     def get_nodo(self, id):
         """
         Devuelve el nodo con el ID especificado o None si no existe.
+
+        :return: Nodo encontrado.
+        :rtype: Nodo or None
         """
         for nodo in self.nodos:
             if nodo.identificador == id:
@@ -85,24 +96,36 @@ class Grafo:
     def crear_nodo(self, id, **kwargs):
         """
         Crea un nuevo nodo con ID único y las propiedades especificadas.
+
+        :param id: Identificador único del nodo. Puede ser de cualquier tipo (str, int, etc..), pero deberá buscarse de la misma manera.
+        :param **kwargs: Kwargs con los atributos que contendrá el nodo (Se pueden agregar o modificar atributos posteriormente).
         """
         if self.get_nodo(id) is None:
             nodo = Nodo(id, **kwargs)
             self.nodos.append(nodo)
+        else:
+            print("ERROR: Ya existe un nodo con el identificador especificado. No se creará un nuevo nodo.")
     
     def copiar_nodo(self, nodo, nuevo_id = None):
         """
-        Agrega una copia sin vecinos de un objeto de clase Nodo al grafo, siempre y cuando no exista un nodo con el mismo identificador en el grafo. 
-        :param nodo: Nodo a agregar.
+        Agrega una copia sin vecinos pero con los mismos atributos de un Nodo existente en cualquier grafo, siempre y cuando no exista 
+        un nodo con el mismo identificador en el grafo. 
+        
+        :param Nodo nodo: Nodo a copiar para agregar al grafo.
+        :param nuevo_id: (Opcional) Si se proporciona, el nodo será creado con ese ID.
         """
-        if self.get_nodo(nodo.identificador) is None:
-            copia = Nodo(nodo.identificador if (nuevo_id is None) else nuevo_id)
+        id = nodo.identificador if (nuevo_id is None) else nuevo_id
+        if self.get_nodo(id) is None:
+            copia = Nodo(id)
             copia.propiedad = nodo.propiedad.copy()
             self.nodos.append(copia)
 
     def guardar(self, nombre_archivo, identificador = ""):
         """
-        Guarda el grafo en un archivo GV con el nombre especificado.
+        Guarda el grafo en un archivo GV con el nombre especificado. Si el archivo existe, se sobreescribirá.
+
+        :param str nombre_archivo: Nombre con el que se creará el archivo (Sin extensión).
+        :param str identificador: (Opcional) Si se proporciona, se guardará el grafo con ese nombre (Diferente a nombre de archivo).
         """
         try:
             os.mkdir("grafos")
@@ -116,7 +139,7 @@ class Grafo:
         with open(nombre_archivo + ".gv", 'w') as archivo:
             archivo.write(("digraph " if self.es_dirigido else "graph ") + ((identificador + " {") if identificador else "{") + '\n')
             for nodo in self.nodos:            
-                if len(nodo.vecinos) == 0 or nodo.propiedad:
+                if not nodo.vecinos or nodo.propiedad:
                     archivo.write(str(nodo) + ";")
                     archivo.write(" [" if nodo.propiedad else "")
                     for propiedad in nodo.propiedad:
@@ -134,7 +157,9 @@ class Grafo:
         """
         Indica si el grafo está conectado.
 
-        :param arista_a_remover: Arista que se ignora al evaluar el grafo, sin removerla del original.
+        :param arista_a_remover: (Opcional) Arista que se ignora al evaluar el grafo, sin removerla del original.
+        :return: True si está conectado, False si no. Si no existen nodos, se evaluará como True.
+        :rtype: bool
         """
         if not self.nodos:
             return True
@@ -154,16 +179,16 @@ class Grafo:
         Genera un grafo con el árbol inducido por el algorítmo de búsqueda "Breadth First Search".
 
         :param s: ID del nodo de inicio. 
-        :return: Árbol BFS
-        :rtype: Grafo
+        :return: Árbol BFS. None si s no existe en el grafo.
+        :rtype: Grafo or None
         """
         if(self.get_nodo(s) is None):
+            print("ERROR: No existe el nodo de inicio en el grafo.")
             return None
         capas = [[s]]
         descubiertos = [s]
         arbol = Grafo(self.es_dirigido)
         arbol.copiar_nodo(self.get_nodo(s))
-        capas.append([])
         for capa in capas:
             capas.append([])
             for nodoActual in capa:
@@ -183,10 +208,11 @@ class Grafo:
         Genera un grafo con el árbol inducido por el algorítmo de búsqueda "Depth First Search" de manera iterativa.
         
         :param s: ID del nodo de inicio. 
-        :return: Árbol generado del grafo.
-        :rtype: Grafo
+        :return: Árbol generado del grafo. None si s no existe en el grafo.
+        :rtype: Grafo or None
         """
         if(self.get_nodo(s) is None):
+            print("ERROR: No existe el nodo de inicio en el grafo")
             return None
         descubiertos = [self.get_nodo(s)]
         index_nodo_raiz = 0
@@ -212,9 +238,12 @@ class Grafo:
         Genera un grafo con el árbol inducido por el algorítmo de búsqueda "Depth First Search" de manera recursiva.
         
         :param s: ID del nodo de inicio. 
-        :return: Árbol generado del grafo.
-        :rtype: Grafo
+        :return: Árbol generado del grafo.None si s no existe en el grafo.
+        :rtype: Grafo or None
         """
+        if(self.get_nodo(s) is None):
+            print("ERROR: No existe el nodo de inicio en el grafo")
+            return None
         arbol = self.DFS_llamada_recursiva(s)
         for nodo in self.nodos:
             nodo.propiedad.pop("dfs_visitado", "")
@@ -240,10 +269,11 @@ class Grafo:
         Requiere de la propiedad "distancia" en las aristas, de otra forma se tomará el valor como 0.
         
         :param s: ID del nodo de inicio.
-        :return: Tupla donde el elemento [0] es una copia del grafo etiquetado con las distancias y [1] el árbol inducido.
-        :rtype: (Grafo, Grafo)
+        :return: Tupla donde el elemento [0] es una copia del grafo etiquetado con las distancias y [1] el árbol inducido. None si no se encuentra s.
+        :rtype: (Grafo, Grafo) or None
         """
         if(self.get_nodo(s) is None):
+            print("ERROR: No existe el nodo de inicio en el grafo")
             return None
         dijkstra = self.duplicar()
         arbol = Grafo(self.es_dirigido)
@@ -331,7 +361,7 @@ class Grafo:
         :rtype: (Grafo, int)
         """
         if not self.nodos:
-            return None
+            return (Grafo(False), 0)
         aristas_candidato = []
         arbol = Grafo(False)
         peso = 0
@@ -404,6 +434,12 @@ class Grafo:
         return False
     
     def duplicar(self):
+        """
+        Genera una copia exacta e independiente del grafo.
+        
+        :returns: Copia del grafo.
+        :rtype: Grafo
+        """
         copia = Grafo(self.es_dirigido)
         for nodo in self.nodos:
             copia.copiar_nodo(nodo)
@@ -595,6 +631,14 @@ class Grafo:
             return grafo
 
 class Nodo:
+    """
+    Una clase que representa un Nodo.
+
+    Attributes:
+        identificador: ID del nodo. Único dentro del grafo. Puede ser de cualquier tipo (str, int, etc..), pero deberá buscarse de la misma manera.
+        propiedad (dict): Diccionario con las propiedades del nodo (key:value).
+        vecinos (list((Nodo, Arista))): Lista con tuplas (Nodo, Arista) de los nodos hacia los que está conectado el Nodo.
+    """
     def __init__(self, id, **kwargs):
         self.identificador = id
         self.propiedad = {}
@@ -607,7 +651,8 @@ class Nodo:
     
     def conectar_a(self, nodo, arista):
         """
-        Conecta el nodo al nodo especificado usando la arista dada.
+        Conecta el nodo a otro nodo especificado usando la arista dada. Para uso de la clase Grafo. 
+        No es recomendable usarse directamente, llame Grafo.conectar_nodos en su lugar.
         """
         for vecino in self.vecinos:
             if nodo is vecino[0]:
