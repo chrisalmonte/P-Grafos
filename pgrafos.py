@@ -15,12 +15,19 @@ class Grafo:
     def num_nodos(self):
         """
         Cantidad de nodos en el grafo.
+        
+        :return: La cantidad de nodos en el grafo.
+        :rtype: int
         """
         return len(self.nodos) 
 
     def conectar_nodos(self, id_de, id_a, **kwargs):
         """
         Crea una arista y conecta 2 nodos dentro del grafo tomando en cuenta si es dirigido o no.
+
+        :param id_de: ID del nodo inicial. Debe ser del mismo tipo del identificador (str, int, etc..). Si no, el nodo no será encontrado.
+        :param id_de: ID del nodo terminal. Debe ser del mismo tipo del identificador (str, int, etc..). Si no, el nodo no será encontrado.
+        :param **kwargs: Kwargs con los atributos que contendrá la arista entre los nodos.
         """
         nodo_de = self.get_nodo(id_de)
         nodo_a = self.get_nodo(id_a)
@@ -34,7 +41,10 @@ class Grafo:
             nodo_a.conectar_a(nodo_de, arista)
 
     def desconectar_nodos(self, id_de, id_a):
-        """Elimina la arista entre los nodos."""
+        """
+        Elimina la arista entre los nodos.
+        
+        """
         nodo_de = self.get_nodo(id_de)
         nodo_a = self.get_nodo(id_a)
         if nodo_de is None or nodo_a is None:
@@ -132,8 +142,10 @@ class Grafo:
     def BFS(self, s):
         """
         Genera un grafo con el árbol inducido por el algorítmo de búsqueda "Breadth First Search".
+
         :param s: ID del nodo de inicio. 
-        :return: Grafo
+        :return: Árbol BFS
+        :rtype: Grafo
         """
         if(self.get_nodo(s) is None):
             return None
@@ -159,8 +171,10 @@ class Grafo:
     def DFS_iterativo(self, s):
         """
         Genera un grafo con el árbol inducido por el algorítmo de búsqueda "Depth First Search" de manera iterativa.
+        
         :param s: ID del nodo de inicio. 
-        :return: Grafo
+        :return: Árbol generado del grafo.
+        :rtype: Grafo
         """
         if(self.get_nodo(s) is None):
             return None
@@ -185,10 +199,11 @@ class Grafo:
 
     def DFS_recursivo(self, s):
         """
-        Genera un grafo con el árbol inducido por el algorítmo de búsqueda "Depth First Search" de manera recursiva y
-        limpia el árbol de las propiedades "visitado".
+        Genera un grafo con el árbol inducido por el algorítmo de búsqueda "Depth First Search" de manera recursiva.
+        
         :param s: ID del nodo de inicio. 
-        :return: Grafo
+        :return: Árbol generado del grafo.
+        :rtype: Grafo
         """
         arbol = self.DFS_llamada_recursiva(s)
         for nodo in self.nodos:
@@ -196,9 +211,7 @@ class Grafo:
         return arbol
     
     def DFS_llamada_recursiva(self, s):
-        """
-        No invocar directamente. Para generar el DFS de manera recursiva utilice el método "DFS_recursivo".
-        """
+        """No invocar directamente. Para generar el DFS de manera recursiva utilice el método "DFS_recursivo"."""
         if(self.get_nodo(s) is None):
             return None
         nodo_origen = self.get_nodo(s)
@@ -217,7 +230,8 @@ class Grafo:
         Requiere de la propiedad "distancia" en las aristas, de otra forma se tomará el valor como 0.
         
         :param s: ID del nodo de inicio.
-        :return: tuple: Tupla donde el elemento [0] es una copia del grafo etiquetado con las distancias y [1] el árbol inducido.
+        :return: Tupla donde el elemento [0] es una copia del grafo etiquetado con las distancias y [1] el árbol inducido.
+        :rtype: (Grafo, Grafo)
         """
         if(self.get_nodo(s) is None):
             return None
@@ -262,7 +276,8 @@ class Grafo:
         Calcula el árbol de expansión mínima usando el algoritmo de Kruskal Inverso.
         Requiere de la propiedad "distancia" en las aristas, de otra forma se tomará el valor como 0.
         
-        :return: tuple: Tupla donde el elemento [0] es el árbol de expansión mínima y [1] es su peso total.
+        :return: Tupla donde el elemento [0] es el árbol de expansión mínima y [1] es su peso total.
+        :rtype: (Grafo, int)
         """
         mst = self.duplicar()
         mst.aristas.sort(key=Grafo.get_distancia_arista, reverse=True)
@@ -282,7 +297,8 @@ class Grafo:
         Calcula el árbol de expansión mínima usando el algoritmo de Kruskal Directo.
         Requiere de la propiedad "distancia" en las aristas, de otra forma se tomará el valor como 0.
         
-        :return: tuple: Tupla donde el elemento [0] es el árbol de expansión mínima y [1] es su peso total.
+        :return: Tupla donde el elemento [0] es el árbol de expansión mínima y [1] es su peso total.
+        :rtype: (Grafo, int)
         """
         mst = Grafo(False)
         aristas = self.aristas
@@ -302,6 +318,7 @@ class Grafo:
         Requiere de la propiedad "distancia" en las aristas, de otra forma se tomará el valor como 0.
 
         :return: Tupla donde el elemento [0] es el árbol de expansión mínima y [1] es su peso total.
+        :rtype: (Grafo, int)
         """
         if not self.nodos:
             return None
@@ -338,7 +355,7 @@ class Grafo:
 
     def get_distancia_arista(arista):
         """
-        Función para ordenar las aristas por distancia usando list.sort. 
+        Función para ordenar las aristas por distancia usando list.sort.
         Si desea consultar una propiedad, obtenga el valor directamente del diccionario Arista.propiedad (Arista.propiedad.get())
         """
         return arista.propiedad.get("distancia", 0)
@@ -348,7 +365,9 @@ class Grafo:
         Indica si el grafo contiene almenos un ciclo desde el nodo indicado.
         
         :param s: Nodo desde donde se evalua el ciclo.
-        :param arista_a_agregar: Arista adicional con la que se evalua el grafo, sin agregarla al original.
+        :param Arista arista_a_agregar: Arista adicional con la que se evalua el grafo, sin agregarla al original.
+        :returns: True si hay un ciclo, False si no.
+        :rtype: bool
         """
         if self.get_nodo(s) is None:
             return False
@@ -387,13 +406,15 @@ class Grafo:
     def generar_malla(cls, n, m, es_dirigido = False):
         """
         Genera una malla de n filas por m columnas.
-        :param n: Filas
-        :param m: Columnas
-        :return: Grafo
+
+        :param int n: Filas
+        :param int m: Columnas
+        :return: Grafo generado
+        :rtype: Grafo
         """
         grafo = cls(es_dirigido)
-        for i in range(0, n):
-            for j in range(0, m):
+        for i in range(n):
+            for j in range(m):
                 id_actual = j + (i * m)
                 grafo.crear_nodo(id_actual)
                 if (id_actual % m) != 0:
@@ -406,14 +427,16 @@ class Grafo:
     def generar_ErdosRenyi(cls, n, m, es_dirigido = False):
         """
         Crea un gráfo con el modelo Erdös-Renyi. Define n nodos y elige m parejas al azar.
-        :param n: Cantidad de nodos
-        :param m: Cantidad de aristas (>= n-1)
-        :return: Grafo
+
+        :param int n: Cantidad de nodos
+        :param int m: Cantidad de aristas (>= n-1)
+        :return: Grafo generado
+        :rtype: Grafo
         """
         grafo = cls(es_dirigido)
-        for i in range(0, n):
+        for i in range(n):
             grafo.crear_nodo(i)
-        for i in range(0, m):
+        for i in range(m):
             n_de = random.randrange(0, n)
             n_a = random.randrange(0, n)
             if n_de == n_a:
@@ -425,16 +448,18 @@ class Grafo:
     def generar_Gilbert(cls, n, p, es_dirigido = False):
         """
         Crea un gráfo con el modelo de Gilbert. Define n nodos con p probabilidad de cada uno conectarse con el resto.
-        :param n: Cantidad de nodos
-        :param p: [0 - 1] Probabilidad de conectar un nodo con el resto.
-        :return: Grafo
+
+        :param int n: Cantidad de nodos
+        :param float p: Valor entre 0 y 1. Probabilidad de conectar un nodo con cada nodo anterior.
+        :return: Grafo generado
+        :rtype: Grafo
         """
         p = min(p, 1) * 100
         grafo = cls(es_dirigido)
-        for i in range(0, n):
+        for i in range(n):
             grafo.crear_nodo(i)
-        for i in range(0, n):
-            for j in range(0, n):
+        for i in range(n):
+            for j in range(n):
                 if i == j:
                     break
                 if(random.randint(0, 100) <= p):
@@ -445,17 +470,19 @@ class Grafo:
     def generar_geo_simple(cls, n, r, es_dirigido = False):
         """
         Crea un gráfo con el método geográfico simple. Define n nodos con coordenadas aleatorias normales. 
-        Se conectan aquellos entre distancia menor o igual a r. 
-        :param n: Cantidad de nodos
-        :param r: Distancia mínima para conectarse.
-        :return: Grafo
+        Se conectan aquellos entre distancia menor o igual a r.
+
+        :param int n: Cantidad de nodos
+        :param float r: Valor entre 0 y 1. Distancia mínima para conectarse.
+        :return: Grafo generado
+        :rtype: Grafo
         """
         r = min(r, 1)
         grafo = cls(es_dirigido)
-        for i in range(0, n):
+        for i in range(n):
             grafo.crear_nodo(i, x = random.random(), y = random.random())
-        for i in range(0, n):
-            for j in range(0, n):
+        for i in range(n):
+            for j in range(n):
                 if i == j:
                     break
                 if (r >= math.dist([grafo.get_nodo(i).propiedad["x"], grafo.get_nodo(i).propiedad["y"]],
@@ -466,10 +493,12 @@ class Grafo:
     @classmethod
     def generar_BarbasiAlbert_variante(cls, n, d, es_dirigido = False):
         """
-        Crea un gráfo con una variante del Método Barbasi-Albert. 
-        :param n: Cantidad de nodos
-        :param d: Grado máximo esperado por cada nodo.
-        :return: Grafo
+        Crea un gráfo con una variante del Método Barbasi-Albert.
+
+        :param int n: Cantidad de nodos
+        :param int d: Grado máximo esperado por cada nodo.
+        :return: Grafo generado
+        :rtype: Grafo
         """
         grafo = cls(es_dirigido)
         grafo.crear_nodo(0)
@@ -494,8 +523,10 @@ class Grafo:
         """
         Se crean 3 nodos y 3 aristas formando un triángulo.
         Para cada nodo adicional, se selecciona una arista al azar y se crean aristas entre sus extremos y el nodo nuevo.
-        :param n: Cantidad de nodos (>= 3)
-        :return: Grafo
+
+        :param int n: Cantidad de nodos en el grafo. (Mayor o igual a 3, de otra forma el grafo se generará con 3 nodos).
+        :return: Grafo generado
+        :rtype: Grafo
         """
         n = max(n, 3)
         grafo = cls(es_dirigido)
@@ -516,8 +547,11 @@ class Grafo:
     @classmethod
     def generar_desde_archivo(cls, ruta):
         """
-        Genera el grafo a partir de un archivo .gv creado por pgrafos.
-        :param ruta: Ruta del archivo.
+        Genera el grafo a partir de un archivo .gv creado por esta biblioteca.
+        
+        :param str ruta: Ruta del archivo.
+        :return: Grafo generado
+        :rtype: Grafo
         """
         grafo = None
         conector = "--"
