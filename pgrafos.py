@@ -123,6 +123,7 @@ class Grafo:
     def guardar(self, nombre_archivo, identificador = ""):
         """
         Guarda el grafo en un archivo GV con el nombre especificado. Si el archivo existe, se sobreescribirá.
+        Los archivos son guardados en el directorio "grafos".
 
         :param str nombre_archivo: Nombre con el que se creará el archivo (Sin extensión).
         :param str identificador: (Opcional) Si se proporciona, se guardará el grafo con ese nombre (Diferente a nombre de archivo).
