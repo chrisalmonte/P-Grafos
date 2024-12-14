@@ -382,7 +382,7 @@ class Grafo:
     
     def hay_ciclo_desde(self, s, arista_a_agregar=None):
         """
-        Indica si el grafo contiene almenos un ciclo desde el nodo indicado.
+        Indica si el grafo contiene almenos un ciclo desde el nodo indicado. Regresa False si no existe el nodo inicial.
         
         :param s: Nodo desde donde se evalua el ciclo.
         :param Arista arista_a_agregar: Arista adicional con la que se evalua el grafo, sin agregarla al original.
