@@ -640,6 +640,11 @@ class Nodo:
         vecinos (list((Nodo, Arista))): Lista con tuplas (Nodo, Arista) de los nodos hacia los que está conectado el Nodo.
     """
     def __init__(self, id, **kwargs):
+        """
+        Crea un nodo. Se le pueden asignar propiedades.
+
+        :param **kwargs: (Opcional) [Llave=valor] Define propiedades y sus valores para el nodo.
+        """
         self.identificador = id
         self.propiedad = {}
         self.vecinos = [] ##tuplas (nodo, arista)
@@ -653,6 +658,9 @@ class Nodo:
         """
         Conecta el nodo a otro nodo especificado usando la arista dada. Para uso de la clase Grafo. 
         No es recomendable usarse directamente, llame Grafo.conectar_nodos en su lugar.
+
+        :param Nodo nodo: Nodo al que estará conectado. (Dirigido a)
+        :param Arista arista: Arista mediante la cual estarán conectados los nodos.
         """
         for vecino in self.vecinos:
             if nodo is vecino[0]:
@@ -663,12 +671,20 @@ class Nodo:
     def definir_propiedad(self, llave, valor):
         """
         Define la llave y valor de una propiedad en el nodo.
+
+        :param str llave: Nombre de la propiedad
+        :param valor: Valor que tendrá la propiedad.
         """
         self.propiedad[llave] = valor
 
 
 class Arista:
     def __init__(self, **kwargs):
+        """
+        Crea una arista. Se le pueden asignar propiedades.
+
+        :param **kwargs: (Opcional) [Llave=valor] Define propiedades y sus valores para la arista.
+        """
         self.propiedad = {}
         self.extremos = (None, None)
         for llave, valor in kwargs.items():
@@ -678,10 +694,19 @@ class Arista:
         return str(self.extremos[0]) + " --> " + str(self.extremos[1])
 
     def definir_extremos(self, nodo_de, nodo_a):
+        """
+        Crea referencias a los nodos que conecta la arista.
+
+        :param Nodo nodo_de: Nodo del que parte la arista.
+        :param Nodo nodo_a: Nodo al que llega la arista.
+        """
         self.extremos = (nodo_de, nodo_a)
 
     def definir_propiedad(self, llave, valor):
         """
         Define la llave y valor de una propiedad en la arista.
+
+        :param str llave: Nombre de la propiedad
+        :param valor: Valor que tendrá la propiedad.
         """
         self.propiedad[llave] = valor
