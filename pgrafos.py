@@ -153,27 +153,6 @@ class Grafo:
                             archivo.write(" " + str(propiedad) + "=" + str(vecino[1].propiedad[propiedad]) + " ")
                         archivo.write("]\n" if vecino[1].propiedad else "\n")
             archivo.write("}\n")
-
-    def esta_conectado(self, arista_a_remover=None):
-        """
-        Indica si el grafo está conectado.
-
-        :param arista_a_remover: (Opcional) Arista que se ignora al evaluar el grafo, sin removerla del original.
-        :return: True si está conectado, False si no. Si no existen nodos, se evaluará como True.
-        :rtype: bool
-        """
-        if not self.nodos:
-            return True
-        nodos_visitados = []
-        grafo = self if arista_a_remover is None else self.duplicar() 
-        if arista_a_remover is not None:
-            grafo.desconectar_nodos(arista_a_remover.extremos[0].identificador, arista_a_remover.extremos[1].identificador)
-        nodos_visitados.append(grafo.nodos[0])
-        for nodo in nodos_visitados:
-            for vecino in nodo.vecinos:
-                if vecino[0] not in nodos_visitados:
-                    nodos_visitados.append(vecino[0])
-        return len(nodos_visitados) == len(grafo.nodos)
     
     def BFS(self, s):
         """
@@ -433,6 +412,27 @@ class Grafo:
             if (nodo_siguiente is None):
                 index_nodo_raiz = (index_nodo_raiz - 1)
         return False
+    
+    def esta_conectado(self, arista_a_remover=None):
+        """
+        Indica si el grafo está conectado.
+
+        :param arista_a_remover: (Opcional) Arista que se ignora al evaluar el grafo, sin removerla del original.
+        :return: True si está conectado, False si no. Si no existen nodos, se evaluará como True.
+        :rtype: bool
+        """
+        if not self.nodos:
+            return True
+        nodos_visitados = []
+        grafo = self if arista_a_remover is None else self.duplicar() 
+        if arista_a_remover is not None:
+            grafo.desconectar_nodos(arista_a_remover.extremos[0].identificador, arista_a_remover.extremos[1].identificador)
+        nodos_visitados.append(grafo.nodos[0])
+        for nodo in nodos_visitados:
+            for vecino in nodo.vecinos:
+                if vecino[0] not in nodos_visitados:
+                    nodos_visitados.append(vecino[0])
+        return len(nodos_visitados) == len(grafo.nodos)
     
     def duplicar(self):
         """
