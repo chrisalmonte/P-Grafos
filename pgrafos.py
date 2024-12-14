@@ -371,11 +371,18 @@ class Grafo:
             for i in a_remover:
                 aristas_candidato.pop(i - contador)
                 contador += 1
-        return(arbol, peso)    
+        return(arbol, peso)        
+
+    def get_distancia_arista(arista):
+        """
+        Función para ordenar las aristas por distancia usando list.sort.
+        Si desea consultar una propiedad, obtenga el valor directamente del diccionario Arista.propiedad (Arista.propiedad.get())
+        """
+        return arista.propiedad.get("distancia", 0)
     
     def hay_ciclo_desde(self, s, arista_a_agregar=None):
         """
-        Indica si el grafo contiene almenos un ciclo desde el nodo indicado. Regresa False si no existe el nodo inicial.
+        Indica si el grafo contiene almenos un ciclo desde el nodo indicado.
         
         :param s: Nodo desde donde se evalua el ciclo.
         :param Arista arista_a_agregar: Arista adicional con la que se evalua el grafo, sin agregarla al original.
@@ -417,16 +424,15 @@ class Grafo:
         if not self.nodos:
             return True
         nodos_visitados = []
+        grafo = self if arista_a_remover is None else self.duplicar() 
         if arista_a_remover is not None:
-            self.desconectar_nodos(arista_a_remover.extremos[0].identificador, arista_a_remover.extremos[1].identificador)
-        nodos_visitados.append(self.nodos[0])
+            grafo.desconectar_nodos(arista_a_remover.extremos[0].identificador, arista_a_remover.extremos[1].identificador)
+        nodos_visitados.append(grafo.nodos[0])
         for nodo in nodos_visitados:
             for vecino in nodo.vecinos:
                 if vecino[0] not in nodos_visitados:
                     nodos_visitados.append(vecino[0])
-        if arista_a_remover is not None:
-            self.conectar_nodos(arista_a_remover.extremos[0].identificador, arista_a_remover.extremos[1].identificador)
-        return len(nodos_visitados) == len(self.nodos)
+        return len(nodos_visitados) == len(grafo.nodos)
     
     def duplicar(self):
         """
@@ -442,13 +448,6 @@ class Grafo:
             copia.conectar_nodos(arista.extremos[0].identificador, arista.extremos[1].identificador)
             copia.aristas[-1].propiedad = arista.propiedad.copy()
         return copia
-    
-    def get_distancia_arista(arista):
-        """
-        Función para ordenar las aristas por distancia usando list.sort.
-        Si desea consultar una propiedad, obtenga el valor directamente del diccionario Arista.propiedad (Arista.propiedad.get())
-        """
-        return arista.propiedad.get("distancia", 0)
 
     @classmethod
     def generar_malla(cls, n, m, es_dirigido = False):
