@@ -418,7 +418,7 @@ class Grafo:
         Indica si el grafo está conectado.
 
         :param arista_a_remover: (Opcional) Arista que se ignora al evaluar el grafo, sin removerla del original.
-        :return: True si está conectado, False si no. Si no existen nodos, se evaluará como True.
+        :return: True si no hay nodos aislados, False si sí. Si no existen nodos, se evaluará como True.
         :rtype: bool
         """
         if not self.nodos:
