@@ -47,7 +47,7 @@ class Grafo:
         nodo_de = self.get_nodo(id_de)
         nodo_a = self.get_nodo(id_a)
         if nodo_de is None or nodo_a is None:
-            print("ERROR: No se encuentra uno o ninguno de los nodos especificados para conectar.")
+            print("ERROR: No se encuentra uno o ninguno de los nodos especificados para conectar." + "(" + str(id_de) + ", " + str(id_a) + ")")
             return        
         arista = Arista(**kwargs)
         self.aristas.append(arista)
@@ -325,9 +325,9 @@ class Grafo:
         aristas.sort(key=Grafo.get_distancia_arista)
         peso_total = 0
         for arista in aristas:
+            mst.copiar_nodo(arista.extremos[0])
+            mst.copiar_nodo(arista.extremos[1])
             if not (mst.hay_ciclo_desde(arista.extremos[0].identificador, arista_a_agregar=arista) or mst.hay_ciclo_desde(arista.extremos[1].identificador, arista_a_agregar=arista)):
-                mst.copiar_nodo(arista.extremos[0])
-                mst.copiar_nodo(arista.extremos[1])
                 mst.conectar_nodos(arista.extremos[0].identificador, arista.extremos[1].identificador, distancia=arista.propiedad.get("distancia", 0))
                 peso_total += arista.propiedad.get("distancia", 0)
         return (mst, peso_total)
