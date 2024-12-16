@@ -391,26 +391,30 @@ class Grafo:
         """
         if self.get_nodo(s) is None:
             return False
-        grafo = self.duplicar()
         if arista_a_agregar is not None:
-            grafo.conectar_nodos(arista_a_agregar.extremos[0].identificador, arista_a_agregar.extremos[1].identificador)
-        descubiertos = [grafo.get_nodo(s)]
+            self.conectar_nodos(arista_a_agregar.extremos[0].identificador, arista_a_agregar.extremos[1].identificador)
+        descubiertos = [self.get_nodo(s)]
+        aristas_recorridas = []
         index_nodo_raiz = 0
         nodo_siguiente = None
         while index_nodo_raiz > -1:
             nodo_siguiente = None
             for vecino in descubiertos[index_nodo_raiz].vecinos:
-                if not vecino[1].propiedad.get("ce_recorrida", False):
-                    vecino[1].definir_propiedad("ce_recorrida", True)
+                if not vecino[1] in aristas_recorridas:
+                    aristas_recorridas.append(vecino[1])
                     if (vecino[0] not in descubiertos):
                         descubiertos.insert(index_nodo_raiz + 1, vecino[0])
                         index_nodo_raiz += 1
                         nodo_siguiente = vecino[0]
                         break
                     else:
+                        if arista_a_agregar is not None:
+                            self.desconectar_nodos(arista_a_agregar.extremos[0].identificador, arista_a_agregar.extremos[1].identificador)
                         return True
             if (nodo_siguiente is None):
                 index_nodo_raiz = (index_nodo_raiz - 1)
+        if arista_a_agregar is not None:
+            self.desconectar_nodos(arista_a_agregar.extremos[0].identificador, arista_a_agregar.extremos[1].identificador)
         return False
     
     def esta_conectado(self, arista_a_remover=None):
