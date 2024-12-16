@@ -324,9 +324,9 @@ class Grafo:
         aristas = self.aristas
         aristas.sort(key=Grafo.get_distancia_arista)
         peso_total = 0
+        for nodo in self.nodos:
+            mst.copiar_nodo(nodo)
         for arista in aristas:
-            mst.copiar_nodo(arista.extremos[0])
-            mst.copiar_nodo(arista.extremos[1])
             if not (mst.hay_ciclo_desde(arista.extremos[0].identificador, arista_a_agregar=arista) or mst.hay_ciclo_desde(arista.extremos[1].identificador, arista_a_agregar=arista)):
                 mst.conectar_nodos(arista.extremos[0].identificador, arista.extremos[1].identificador, distancia=arista.propiedad.get("distancia", 0))
                 peso_total += arista.propiedad.get("distancia", 0)
@@ -364,13 +364,11 @@ class Grafo:
                         aristas_candidato.append(vecino)
                 aristas_candidato.pop(index_mas_corta)
             a_remover = []
-            for i in range(len(aristas_candidato)):
-                if arbol.get_nodo(aristas_candidato[i][0].identificador) is not None:
-                    a_remover.append(i)
-            contador = 0
-            for i in a_remover:
-                aristas_candidato.pop(i - contador)
-                contador += 1
+            for arista in aristas_candidato:
+                if arbol.get_nodo(arista[0].identificador) is not None:
+                    a_remover.append(arista)
+            for arista in a_remover:
+                aristas_candidato.remove(arista)
         return(arbol, peso)        
 
     def get_distancia_arista(arista):
