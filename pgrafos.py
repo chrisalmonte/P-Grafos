@@ -725,5 +725,36 @@ class Arista:
 class Distribucion:
     """Una clase con métodos para distribuir los nodos de un grafo."""
     @staticmethod
-    def spring (grafo):
+    def aleatoria(grafo, limite_x, limite_y):
+        """
+        Distribuye los nodos de un grafo aleatoriamente, con coordenadas de 0 al límite.
+        Define las propiedades de nodo "dis_x" y "dis_y". 
+
+        :param int limite_x: El límite superior de la coordenada horizontal.
+        :param int limite_y: El límite superior de la coordenada vertical.
+        """
+        for nodo in grafo.nodos:
+            nodo.definir_propiedad("dis_x", random.randrange(0, limite_x))
+            nodo.definir_propiedad("dis_y", random.randrange(0, limite_y))
+    
+    @staticmethod
+    def spring(grafo, limite_x, limite_y, c1=2, c2=1, c3=1, c4=0.1):
+        """
+        Iteración del algoritmo Spring para distribuir los nodos de un grafo.
+        atracción(d) = (d^2)/k
+        repulsión(d) = -(k^2)/d
+        distancia óptima k = c*(sqrt(area/número de vértices)) 
+        Define las propiedades de nodo "dis_x" y "dis_y".
+
+        :param int limite_x: El límite superior de la coordenada horizontal.
+        :param int limite_y: El límite superior de la coordenada vertical.
+        :param float c1: (opcional) Valor que tendrá la constante c1 de la fórmula.
+        :param float c2: (opcional) Valor que tendrá la constante c2 de la fórmula.
+        :param float c3: (opcional) Valor que tendrá la constante c3 de la fórmula.
+        :param float c4: (opcional) Valor que tendrá la constante c4 de la fórmula.
+        """
+        fuerza_x = 0
+        fuerza_y = 0
+        #for nodo in grafo.nodos:
+            #d = math.dist([,],[,])
         pass
