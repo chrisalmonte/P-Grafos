@@ -738,23 +738,44 @@ class Distribucion:
             nodo.definir_propiedad("dis_y", random.randrange(0, limite_y))
     
     @staticmethod
-    def spring(grafo, limite_x, limite_y, c1=2, c2=1, c3=1, c4=0.1):
+    def spring(grafo, limite_x, limite_y, c1=2, c2=200, c3=1, c4=1):
         """
         Iteración del algoritmo Spring para distribuir los nodos de un grafo.
-        atracción(d) = (d^2)/k
-        repulsión(d) = -(k^2)/d
-        distancia óptima k = c*(sqrt(area/número de vértices)) 
         Define las propiedades de nodo "dis_x" y "dis_y".
 
         :param int limite_x: El límite superior de la coordenada horizontal.
         :param int limite_y: El límite superior de la coordenada vertical.
-        :param float c1: (opcional) Valor que tendrá la constante c1 de la fórmula.
-        :param float c2: (opcional) Valor que tendrá la constante c2 de la fórmula.
-        :param float c3: (opcional) Valor que tendrá la constante c3 de la fórmula.
-        :param float c4: (opcional) Valor que tendrá la constante c4 de la fórmula.
+        :param float c1: (opcional) Constante de atracción (= 2 si no se especifica).
+        :param float c2: (opcional) Distancia ideal de la arista (= 200 si no se especifica).
+        :param float c3: (opcional) Constante de repulsión (= 1 si no se especifica).
+        :param float c3: (opcional) Multiplicador de fuerza (= 1 si no se especifica).
         """
-        fuerza_x = 0
-        fuerza_y = 0
-        #for nodo in grafo.nodos:
-            #d = math.dist([,],[,])
-        pass
+        for nodo in grafo.nodos:
+            pos_nodo_1 = [nodo.propiedad.get("dis_x", 0), nodo.propiedad.get("dis_y", 0)]
+            vecinos = []
+            #Atracción
+            for vecino in nodo.vecinos:
+                pos_nodo_2 = [vecino[0].propiedad.get("dis_x", 0), vecino[0].propiedad.get("dis_y", 0)]
+                d = math.dist(pos_nodo_1, pos_nodo_2)
+                atraccion = c1 * (math.log(d/c2))
+                direccion = [pos_nodo_2[0] - pos_nodo_1[0], pos_nodo_2[1] - pos_nodo_1[1]]
+                magnitud = math.sqrt(direccion[0]**2 + direccion[1]**2)
+                direccion = [direccion[0] / magnitud, direccion[1] / magnitud]
+                pos_nodo_1 = [pos_nodo_1[0] + (direccion[0] * atraccion * c4), pos_nodo_1[1] + (direccion[1] * atraccion * c4)]
+                pos_nodo_1 = [max(0, min(limite_x, pos_nodo_1[0])), max(0, min(limite_y, pos_nodo_1[1]))]
+                nodo.definir_propiedad("dis_x", pos_nodo_1[0])
+                nodo.definir_propiedad("dis_y", pos_nodo_1[1])
+                vecinos.append(vecino[0])
+            #Repulsión
+            for otro_nodo in grafo.nodos:
+                if otro_nodo not in vecinos:
+                    pos_nodo_2 = [otro_nodo.propiedad.get("dis_x", 0), otro_nodo.propiedad.get("dis_y", 0)]
+                    d = math.dist(pos_nodo_1, pos_nodo_2)
+                    repulsion = c3 / math.sqrt(d if d > 0 else 0.01)
+                    direccion = [pos_nodo_1[0] - pos_nodo_2[0], pos_nodo_1[1] - pos_nodo_2[1]]
+                    magnitud = math.sqrt(direccion[0]**2 + direccion[1]**2)
+                    direccion = [0.01 if magnitud <= 0 else (direccion[0] / magnitud), 0.01 if magnitud <= 0 else (direccion[1] / magnitud)]
+                    pos_nodo_1 = [pos_nodo_1[0] + (direccion[0] * repulsion * c4), pos_nodo_1[1] + (direccion[1] * repulsion * c4)]
+                    pos_nodo_1 = [max(0, min(limite_x, pos_nodo_1[0])), max(0, min(limite_y, pos_nodo_1[1]))]
+                    nodo.definir_propiedad("dis_x", pos_nodo_1[0])
+                    nodo.definir_propiedad("dis_y", pos_nodo_1[1])

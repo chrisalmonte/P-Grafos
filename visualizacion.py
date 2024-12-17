@@ -2,12 +2,11 @@
 
 import pgrafos
 import pygame
-import random
 
 #Propiedades del Grafo
 grafo = pgrafos.Grafo.generar_desde_archivo("grafos/malla/malla_30.gv")
 metodo_disposicion = pgrafos.Distribucion.spring
-max_iteraciones_disp = 100
+max_iteraciones_disp = 10000
 
 #Propiedades del programa
 ventana_ancho = 1280
@@ -22,7 +21,7 @@ arista_ancho = 1
 def calcular_posiciones(grafo):
     global max_iteraciones_disp
     if  max_iteraciones_disp > 0:
-        metodo_disposicion(grafo, ventana_ancho - (nodo_radio * 2), ventana_alto - (nodo_radio * 2))
+        metodo_disposicion(grafo, ventana_ancho - (nodo_radio * 2), ventana_alto - (nodo_radio * 2), c2=50)
         max_iteraciones_disp -= 1
 
 def dibujar_grafo(surface, grafo):
