@@ -682,6 +682,14 @@ class Nodo:
 
 
 class Arista:
+    """
+    Una clase que representa una Arista.
+
+    Attributes:
+        identificador: ID del nodo. Único dentro del grafo. Puede ser de cualquier tipo (str, int, etc..), pero deberá buscarse de la misma manera.
+        propiedad (dict): Diccionario con las propiedades de la arista (key:value).
+        extremos (Nodo, Nodo): Tupla de los nodos que conecta la arista. [0] es el nodo inicial, [1] es el final.
+    """
     def __init__(self, **kwargs):
         """
         Crea una arista. Se le pueden asignar propiedades.
@@ -713,3 +721,9 @@ class Arista:
         :param valor: Valor que tendrá la propiedad.
         """
         self.propiedad[llave] = valor
+
+class Distribucion:
+    """Una clase con métodos para distribuir los nodos de un grafo."""
+    @staticmethod
+    def spring (grafo):
+        pass
