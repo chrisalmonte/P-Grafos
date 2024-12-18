@@ -104,7 +104,7 @@ class Grafo:
             nodo = Nodo(id, **kwargs)
             self.nodos.append(nodo)
         else:
-            print("ERROR: Ya existe un nodo con el identificador especificado. No se creará un nuevo nodo.")
+            return
     
     def copiar_nodo(self, nodo, nuevo_id = None):
         """
@@ -750,7 +750,7 @@ class Distribucion:
         :param float c3: (opcional) Constante de repulsión (= 1 si no se especifica).
         :param float c3: (opcional) Multiplicador de fuerza (= 1 si no se especifica).
         :param int comienzo: (opcional) Índice del nodo con el que se comienza el cálculo.
-        :param int fin: (opcional) Índice del nodo con el que se termina el cálculo.
+        :param int operaciones_por_frame: (opcional) Número de nodos calculados. Si <= 0 se calcularán todos. 
         """
         fin_calculo = len(grafo.nodos) if operaciones_por_frame <= 0 else (min(comienzo + operaciones_por_frame, len(grafo.nodos)))
         for nodo in grafo.nodos[comienzo:fin_calculo]:

@@ -8,7 +8,7 @@ grafo = pgrafos.Grafo.generar_desde_archivo("grafos/malla/malla_100.gv")
 metodo_disposicion = pgrafos.Distribucion.spring
 ultimo_nodo = 0 #último nodo calculado el fotograma anterior
 ipf = 100 #maximo de nodos calculados por fotograma
-max_iteraciones_disp = 1000000 #máximo de iteraciones del algoritmo
+max_iteraciones_disp = 500000 #máximo de iteraciones del algoritmo
 
 #Propiedades del programa
 ventana_ancho = 1280
