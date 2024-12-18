@@ -16,7 +16,7 @@ ventana_alto = 720
 ventana_color = pygame.Color(20,0,25) #RGB
 nodo_color = pygame.Color(255,0,118,255) #RGBA
 nodo_radio = 6 #px
-arista_color = pygame.Color(0,255,200,255)
+arista_color = pygame.Color(130,0,210,255)
 arista_ancho = 1
 
 #Funciones para el programa
