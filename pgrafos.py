@@ -757,10 +757,10 @@ class Distribucion:
             for vecino in nodo.vecinos:
                 pos_nodo_2 = [vecino[0].propiedad.get("dis_x", 0), vecino[0].propiedad.get("dis_y", 0)]
                 d = math.dist(pos_nodo_1, pos_nodo_2)
-                atraccion = c1 * (math.log(d/c2))
+                atraccion = c1 * (math.log((d if d > 0 else 0.01)/c2))
                 direccion = [pos_nodo_2[0] - pos_nodo_1[0], pos_nodo_2[1] - pos_nodo_1[1]]
                 magnitud = math.sqrt(direccion[0]**2 + direccion[1]**2)
-                direccion = [direccion[0] / magnitud, direccion[1] / magnitud]
+                direccion = [0.01 if magnitud <= 0 else (direccion[0] / magnitud), 0.01 if magnitud <= 0 else (direccion[1] / magnitud)]
                 pos_nodo_1 = [pos_nodo_1[0] + (direccion[0] * atraccion * c4), pos_nodo_1[1] + (direccion[1] * atraccion * c4)]
                 pos_nodo_1 = [max(0, min(limite_x, pos_nodo_1[0])), max(0, min(limite_y, pos_nodo_1[1]))]
                 nodo.definir_propiedad("dis_x", pos_nodo_1[0])
