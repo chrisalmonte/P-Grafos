@@ -738,7 +738,7 @@ class Distribucion:
             nodo.definir_propiedad("dis_y", random.randrange(0, limite_y))
     
     @staticmethod
-    def spring(grafo, limite_x, limite_y, c1=2, c2=200, c3=1, c4=1):
+    def spring(grafo, limite_x, limite_y, c1=2, c2=200, c3=1, c4=1, comienzo=0, operaciones_por_frame=-1):
         """
         Iteración del algoritmo Spring para distribuir los nodos de un grafo.
         Define las propiedades de nodo "dis_x" y "dis_y".
@@ -749,8 +749,11 @@ class Distribucion:
         :param float c2: (opcional) Distancia ideal de la arista (= 200 si no se especifica).
         :param float c3: (opcional) Constante de repulsión (= 1 si no se especifica).
         :param float c3: (opcional) Multiplicador de fuerza (= 1 si no se especifica).
+        :param int comienzo: (opcional) Índice del nodo con el que se comienza el cálculo.
+        :param int fin: (opcional) Índice del nodo con el que se termina el cálculo.
         """
-        for nodo in grafo.nodos:
+        fin_calculo = len(grafo.nodos) if operaciones_por_frame <= 0 else (min(comienzo + operaciones_por_frame, len(grafo.nodos)))
+        for nodo in grafo.nodos[comienzo:fin_calculo]:
             pos_nodo_1 = [nodo.propiedad.get("dis_x", 0), nodo.propiedad.get("dis_y", 0)]
             vecinos = []
             #Atracción
