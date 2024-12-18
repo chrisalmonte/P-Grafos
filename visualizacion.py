@@ -25,8 +25,8 @@ def calcular_posiciones(grafo):
     global ultimo_nodo
     if  max_iteraciones_disp > 0:
         metodo_disposicion(grafo, ventana_ancho - (nodo_radio * 2), ventana_alto - (nodo_radio * 2), c1=110, c2=15, c3=6, c4=0.01, comienzo=ultimo_nodo, operaciones_por_frame=ipf)
+        max_iteraciones_disp = (max_iteraciones_disp - 1) if (ultimo_nodo + ipf) >= len(grafo.nodos) else max_iteraciones_disp
         ultimo_nodo = (ultimo_nodo + ipf) % len(grafo.nodos)
-        max_iteraciones_disp -= 1
 
 def dibujar_grafo(surface, grafo):
     for arista in grafo.aristas:
