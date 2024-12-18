@@ -104,7 +104,7 @@ class Grafo:
             nodo = Nodo(id, **kwargs)
             self.nodos.append(nodo)
         else:
-            print("ERROR: Ya existe un nodo con el identificador especificado. No se creará un nuevo nodo.")
+            return
     
     def copiar_nodo(self, nodo, nuevo_id = None):
         """
@@ -682,6 +682,14 @@ class Nodo:
 
 
 class Arista:
+    """
+    Una clase que representa una Arista.
+
+    Attributes:
+        identificador: ID del nodo. Único dentro del grafo. Puede ser de cualquier tipo (str, int, etc..), pero deberá buscarse de la misma manera.
+        propiedad (dict): Diccionario con las propiedades de la arista (key:value).
+        extremos (Nodo, Nodo): Tupla de los nodos que conecta la arista. [0] es el nodo inicial, [1] es el final.
+    """
     def __init__(self, **kwargs):
         """
         Crea una arista. Se le pueden asignar propiedades.
@@ -713,3 +721,64 @@ class Arista:
         :param valor: Valor que tendrá la propiedad.
         """
         self.propiedad[llave] = valor
+
+class Distribucion:
+    """Una clase con métodos para distribuir los nodos de un grafo."""
+    @staticmethod
+    def aleatoria(grafo, limite_x, limite_y):
+        """
+        Distribuye los nodos de un grafo aleatoriamente, con coordenadas de 0 al límite.
+        Define las propiedades de nodo "dis_x" y "dis_y". 
+
+        :param int limite_x: El límite superior de la coordenada horizontal.
+        :param int limite_y: El límite superior de la coordenada vertical.
+        """
+        for nodo in grafo.nodos:
+            nodo.definir_propiedad("dis_x", random.randrange(0, limite_x))
+            nodo.definir_propiedad("dis_y", random.randrange(0, limite_y))
+    
+    @staticmethod
+    def spring(grafo, limite_x, limite_y, c1=2, c2=200, c3=1, c4=1, comienzo=0, operaciones_por_frame=-1):
+        """
+        Iteración del algoritmo Spring para distribuir los nodos de un grafo.
+        Define las propiedades de nodo "dis_x" y "dis_y".
+
+        :param int limite_x: El límite superior de la coordenada horizontal.
+        :param int limite_y: El límite superior de la coordenada vertical.
+        :param float c1: (opcional) Constante de atracción (= 2 si no se especifica).
+        :param float c2: (opcional) Distancia ideal de la arista (= 200 si no se especifica).
+        :param float c3: (opcional) Constante de repulsión (= 1 si no se especifica).
+        :param float c3: (opcional) Multiplicador de fuerza (= 1 si no se especifica).
+        :param int comienzo: (opcional) Índice del nodo con el que se comienza el cálculo.
+        :param int operaciones_por_frame: (opcional) Número de nodos calculados. Si <= 0 se calcularán todos. 
+        """
+        fin_calculo = len(grafo.nodos) if operaciones_por_frame <= 0 else (min(comienzo + operaciones_por_frame, len(grafo.nodos)))
+        for nodo in grafo.nodos[comienzo:fin_calculo]:
+            pos_nodo_1 = [nodo.propiedad.get("dis_x", 0), nodo.propiedad.get("dis_y", 0)]
+            vecinos = []
+            #Atracción
+            for vecino in nodo.vecinos:
+                pos_nodo_2 = [vecino[0].propiedad.get("dis_x", 0), vecino[0].propiedad.get("dis_y", 0)]
+                d = math.dist(pos_nodo_1, pos_nodo_2)
+                atraccion = c1 * (math.log((d if d > 0 else 0.01)/c2))
+                direccion = [pos_nodo_2[0] - pos_nodo_1[0], pos_nodo_2[1] - pos_nodo_1[1]]
+                magnitud = math.sqrt(direccion[0]**2 + direccion[1]**2)
+                direccion = [0 if magnitud <= 0 else (direccion[0] / magnitud), 0 if magnitud <= 0 else (direccion[1] / magnitud)]
+                pos_nodo_1 = [pos_nodo_1[0] + (direccion[0] * atraccion * c4), pos_nodo_1[1] + (direccion[1] * atraccion * c4)]
+                pos_nodo_1 = [max(0, min(limite_x, pos_nodo_1[0])), max(0, min(limite_y, pos_nodo_1[1]))]
+                nodo.definir_propiedad("dis_x", pos_nodo_1[0])
+                nodo.definir_propiedad("dis_y", pos_nodo_1[1])
+                vecinos.append(vecino[0])
+            #Repulsión
+            for otro_nodo in grafo.nodos:
+                if otro_nodo not in vecinos:
+                    pos_nodo_2 = [otro_nodo.propiedad.get("dis_x", 0), otro_nodo.propiedad.get("dis_y", 0)]
+                    d = math.dist(pos_nodo_1, pos_nodo_2)
+                    repulsion = c3 / math.sqrt(d if d > 0 else 0.01)
+                    direccion = [pos_nodo_1[0] - pos_nodo_2[0], pos_nodo_1[1] - pos_nodo_2[1]]
+                    magnitud = math.sqrt(direccion[0]**2 + direccion[1]**2)
+                    direccion = [0 if magnitud <= 0 else (direccion[0] / magnitud), 0 if magnitud <= 0 else (direccion[1] / magnitud)]
+                    pos_nodo_1 = [pos_nodo_1[0] + (direccion[0] * repulsion * c4), pos_nodo_1[1] + (direccion[1] * repulsion * c4)]
+                    pos_nodo_1 = [max(0, min(limite_x, pos_nodo_1[0])), max(0, min(limite_y, pos_nodo_1[1]))]
+                    nodo.definir_propiedad("dis_x", pos_nodo_1[0])
+                    nodo.definir_propiedad("dis_y", pos_nodo_1[1])
