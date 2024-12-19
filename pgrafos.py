@@ -782,3 +782,43 @@ class Distribucion:
                     pos_nodo_1 = [max(0, min(limite_x, pos_nodo_1[0])), max(0, min(limite_y, pos_nodo_1[1]))]
                     nodo.definir_propiedad("dis_x", pos_nodo_1[0])
                     nodo.definir_propiedad("dis_y", pos_nodo_1[1])
+    
+    @staticmethod
+    def fruchterman_reingold(grafo, limite_x, limite_y, c=1, comienzo=0, operaciones_por_frame=-1):
+        """
+        Iteración del algoritmo Fruchterman-Reingold para distribuir los nodos de un grafo.
+        Define las propiedades de nodo "dis_x" y "dis_y".
+
+        :param int limite_x: El límite superior de la coordenada horizontal.
+        :param int limite_y: El límite superior de la coordenada vertical.
+        :param int comienzo: (opcional) Índice del nodo con el que se comienza el cálculo.
+        :param int operaciones_por_frame: (opcional) Número de nodos calculados. Si <= 0 se calcularán todos.
+        :param float c1: (opcional) Distancia ideal de la arista (= 20 si no se especifica).
+        """
+        area = limite_x * limite_y
+        k = c * math.sqrt(area / len(grafo.nodos))
+        fin_calculo = len(grafo.nodos) if operaciones_por_frame <= 0 else (min(comienzo + operaciones_por_frame, len(grafo.nodos)))
+        #Repulsión
+        for nodo_v in grafo.nodos[comienzo:fin_calculo]:
+            pos_nodo_v = [nodo_v.propiedad.get("dis_x", 0), nodo_v.propiedad.get("dis_y", 0)]     
+            disp_nodo_v = [nodo_v.propiedad.get("dis_dx", 0), nodo_v.propiedad.get("dis_dy", 0)]
+            for nodo_u in grafo.nodos:
+                if nodo_u is not nodo_v:
+                    pos_nodo_u = [nodo_u.propiedad.get("dis_x", 0), nodo_u.propiedad.get("dis_y", 0)]
+                    delta = [pos_nodo_v[0] - pos_nodo_u[0], pos_nodo_v[1] - pos_nodo_u[1]]
+                    magnitud_delta =  math.sqrt(delta[0]**2 + delta[1]**2)
+                    delta = [0 if magnitud_delta <= 0 else (delta[0] / magnitud_delta), 0 if magnitud_delta <= 0 else (delta[1] / magnitud_delta)]
+                    nodo_v.definir_propiedad("dis_dx", disp_nodo_v[0] + (delta[0] * -(k**2/delta[0])))
+                    nodo_v.definir_propiedad("dis_dy", disp_nodo_v[1] + (delta[1] * -(k**2/delta[1])))
+        #Atracción
+        for arista in grafo.aristas:
+            pos_nodo_u = [arista.extremos[0].propiedad.get("dis_x", 0), arista.extremos[0].propiedad.get("dis_y", 0)]
+            pos_nodo_v = [arista.extremos[1].propiedad.get("dis_x", 0), arista.extremos[1].propiedad.get("dis_y", 0)]
+            delta = [pos_nodo_v[0] - pos_nodo_u[0], pos_nodo_v[1] - pos_nodo_u[1]]
+            magnitud_delta =  math.sqrt(delta[0]**2 + delta[1]**2)
+            delta = [0 if magnitud_delta <= 0 else (delta[0] / magnitud_delta), 0 if magnitud_delta <= 0 else (delta[1] / magnitud_delta)]
+            nodo_v.definir_propiedad("dis_dx", nodo_v.propiedad.get("dis_dx", 0) + (delta[0] * -(k**2/delta[0])))
+            nodo_v.definir_propiedad("dis_dy", nodo_v.propiedad.get("dis_dy", 0) + (delta[1] * -(k**2/delta[1])))
+
+
+        #https://1library.co/article/algoritmo-fruchterman-reingold-ordenaci%C3%B3n-espacial-topolog%C3%ADas-generales.q5r9j57z
