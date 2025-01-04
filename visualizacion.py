@@ -2,13 +2,17 @@
 
 import pgrafos
 import pygame
+from enum import Enum
 
-#Propiedades del Grafo
+#Distribuciones disponibles
+class Metodo(Enum):
+    SPRING = 0
+    FRUCHTERMAN = 1
+
+#Propiedades del grafo y método de distribución
 grafo = pgrafos.Grafo.generar_desde_archivo("grafos/malla/malla_100.gv")
-metodo_disposicion = pgrafos.Distribucion.spring
-ultimo_nodo = 0 #último nodo calculado el fotograma anterior
-ipf = 100 #maximo de nodos calculados por fotograma
-max_iteraciones_disp = 500000 #máximo de iteraciones del algoritmo
+metodo_disposicion = Metodo.SPRING
+metodo_max_iteraciones = 5000
 
 #Propiedades del programa
 ventana_ancho = 1280
@@ -21,12 +25,18 @@ arista_ancho = 1
 
 #Funciones para el programa
 def calcular_posiciones(grafo):
-    global max_iteraciones_disp
-    global ultimo_nodo
-    if  max_iteraciones_disp > 0:
-        metodo_disposicion(grafo, ventana_ancho - (nodo_radio * 2), ventana_alto - (nodo_radio * 2), c1=110, c2=15, c3=6, c4=0.01, comienzo=ultimo_nodo, operaciones_por_frame=ipf)
-        max_iteraciones_disp = (max_iteraciones_disp - 1) if (ultimo_nodo + ipf) >= len(grafo.nodos) else max_iteraciones_disp
-        ultimo_nodo = (ultimo_nodo + ipf) % len(grafo.nodos)
+    global metodo_max_iteraciones
+    if  metodo_max_iteraciones > 0:
+        match metodo_disposicion:
+            case Metodo.SPRING:
+                pgrafos.Distribucion.spring(grafo, ventana_ancho - (nodo_radio * 2), ventana_alto - (nodo_radio * 2), c1=110, c2=15, c3=6, c4=0.01)
+
+            case _:
+                print("No se ha especificado un método de distribución. \nSe usará la distribución aleatoria.")
+                metodo_max_iteraciones = 0
+                return
+
+        metodo_max_iteraciones -= 1
 
 def dibujar_grafo(surface, grafo):
     for arista in grafo.aristas:
