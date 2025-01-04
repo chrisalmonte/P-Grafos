@@ -10,9 +10,10 @@ class Metodo(Enum):
     FRUCHTERMAN = 1
 
 #Propiedades del grafo y método de distribución
-grafo = pgrafos.Grafo.generar_desde_archivo("grafos/malla/malla_100.gv")
+grafo = pgrafos.Grafo.generar_desde_archivo("grafos/geografico/geografico_100.gv")
 metodo_disposicion = Metodo.FRUCHTERMAN
-metodo_max_iteraciones = 1
+metodo_iteraciones = 50000000
+temperatura = 1650
 
 #Propiedades del programa
 ventana_ancho = 1280
@@ -25,28 +26,30 @@ arista_ancho = 1
 
 #Funciones para el programa
 def calcular_posiciones(grafo):
-    global metodo_max_iteraciones
-    if  metodo_max_iteraciones > 0:
+    global metodo_iteraciones
+    if  metodo_iteraciones > 0:
         match metodo_disposicion:
             case Metodo.SPRING:
-                pgrafos.Distribucion.spring(grafo, ventana_ancho - (nodo_radio * 2), ventana_alto - (nodo_radio * 2), c1=110, c2=15, c3=6, c4=0.01)
+                pgrafos.Distribucion.spring(grafo, ventana_ancho - nodo_radio, ventana_alto - nodo_radio, c1=110, c2=15, c3=6, c4=0.01)
             case Metodo.FRUCHTERMAN:
-                pgrafos.Distribucion.fruchterman_reingold(grafo, ventana_ancho - (nodo_radio * 2), ventana_alto - (nodo_radio * 2), metodo_max_iteraciones)
+                global temperatura
+                pgrafos.Distribucion.fruchterman_reingold(grafo, ventana_ancho - nodo_radio, ventana_alto - nodo_radio, temperatura)
+                temperatura = max(0, temperatura - 1)
             case _:
                 print("No se ha especificado un método de distribución. \nSe usará la distribución aleatoria.")
-                metodo_max_iteraciones = 0
+                metodo_iteraciones = 0
                 return
 
-        metodo_max_iteraciones -= 1
+        metodo_iteraciones -= 1
 
 def dibujar_grafo(surface, grafo):
     for arista in grafo.aristas:
-        inicio = (arista.extremos[0].propiedad.get("dis_x", 0) + nodo_radio, arista.extremos[0].propiedad.get("dis_y", 0) + nodo_radio)
-        fin = (arista.extremos[1].propiedad.get("dis_x", 0) + nodo_radio, arista.extremos[1].propiedad.get("dis_y", 0) + nodo_radio)
+        inicio = (arista.extremos[0].propiedad.get("dis_x", 0), arista.extremos[0].propiedad.get("dis_y", 0))
+        fin = (arista.extremos[1].propiedad.get("dis_x", 0), arista.extremos[1].propiedad.get("dis_y", 0))
         pygame.draw.line(surface, arista_color, inicio, fin, arista_ancho)
 
     for nodo in grafo.nodos:
-        surface.blit(nodo_sprite, dest=(nodo.propiedad.get("dis_x", 0), nodo.propiedad.get("dis_y", 0)))
+        surface.blit(nodo_sprite, dest=(nodo.propiedad.get("dis_x", 0) - nodo_radio, nodo.propiedad.get("dis_y", 0) - nodo_radio))
 
 #Inicializar pygame
 pygame.init()
