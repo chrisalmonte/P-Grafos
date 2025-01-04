@@ -798,11 +798,12 @@ class Distribucion:
             return (magnitud**2)/k
         
         def f_repulsion(magnitud):
-            return 0 if magnitud==0 else ((k**2)/magnitud)
+            magnitud = 0.01 if magnitud==0 else magnitud
+            return (k**2)/magnitud
         
         def unit_vector(vector:list[float, float]):
             magnitud = magnitud_d_vector(vector)
-            return [0,0] if magnitud <= 0 else [vector[0]/magnitud, vector[1]/magnitud]
+            return [0,0] if magnitud == 0 else [vector[0]/magnitud, vector[1]/magnitud]
         
         def magnitud_d_vector(vector:list[float, float]):
             return math.sqrt(vector[0]**2 + vector[1]**2)
@@ -810,13 +811,13 @@ class Distribucion:
         #Repulsión
         for nodo_v in grafo.nodos:
             pos_nodo_v = [nodo_v.propiedad.get("dis_x", 0), nodo_v.propiedad.get("dis_y", 0)]     
-            disp_nodo_v = [nodo_v.propiedad.get("dis_dx", 0), nodo_v.propiedad.get("dis_dy", 0)]
+            disp_nodo_v = [0, 0]
             for nodo_u in grafo.nodos:
                 if nodo_u is not nodo_v:
                     pos_nodo_u = [nodo_u.propiedad.get("dis_x", 0), nodo_u.propiedad.get("dis_y", 0)]
                     delta = [pos_nodo_v[0] - pos_nodo_u[0], pos_nodo_v[1] - pos_nodo_u[1]]
-                    nodo_v.definir_propiedad("dis_dx", disp_nodo_v[0] + (unit_vector(delta)[0] * f_repulsion(magnitud_d_vector(delta))))
-                    nodo_v.definir_propiedad("dis_dy", disp_nodo_v[1] + (unit_vector(delta)[1] * f_repulsion(magnitud_d_vector(delta))))
+                    nodo_v.definir_propiedad("dis_dx", disp_nodo_v[0] + (unit_vector(delta)[0] * f_repulsion(math.dist(pos_nodo_u, pos_nodo_v))))
+                    nodo_v.definir_propiedad("dis_dy", disp_nodo_v[1] + (unit_vector(delta)[1] * f_repulsion(math.dist(pos_nodo_u, pos_nodo_v))))
         #Atracción
         for arista in grafo.aristas:
             pos_nodo_u = [arista.extremos[0].propiedad.get("dis_x", 0), arista.extremos[0].propiedad.get("dis_y", 0)]
@@ -824,15 +825,15 @@ class Distribucion:
             pos_nodo_v = [arista.extremos[1].propiedad.get("dis_x", 0), arista.extremos[1].propiedad.get("dis_y", 0)]
             disp_nodo_v = [arista.extremos[1].propiedad.get("dis_dx", 0), arista.extremos[1].propiedad.get("dis_dy", 0)]
             delta = [pos_nodo_v[0] - pos_nodo_u[0], pos_nodo_v[1] - pos_nodo_u[1]]
-            arista.extremos[1].definir_propiedad("dis_dx", disp_nodo_v[0] - unit_vector(delta)[0] * f_atraccion(magnitud_d_vector(delta)))
-            arista.extremos[1].definir_propiedad("dis_dy", disp_nodo_v[1] - unit_vector(delta)[1] * f_atraccion(magnitud_d_vector(delta)))
-            arista.extremos[0].definir_propiedad("dis_dx", disp_nodo_u[0] + unit_vector(delta)[0] * f_atraccion(magnitud_d_vector(delta)))
-            arista.extremos[0].definir_propiedad("dis_dy", disp_nodo_u[1] + unit_vector(delta)[1] * f_atraccion(magnitud_d_vector(delta)))
+            arista.extremos[1].definir_propiedad("dis_dx", disp_nodo_v[0] - unit_vector(delta)[0] * f_atraccion(math.dist(pos_nodo_u, pos_nodo_v)))
+            arista.extremos[1].definir_propiedad("dis_dy", disp_nodo_v[1] - unit_vector(delta)[1] * f_atraccion(math.dist(pos_nodo_u, pos_nodo_v)))
+            arista.extremos[0].definir_propiedad("dis_dx", disp_nodo_u[0] + unit_vector(delta)[0] * f_atraccion(math.dist(pos_nodo_u, pos_nodo_v)))
+            arista.extremos[0].definir_propiedad("dis_dy", disp_nodo_u[1] + unit_vector(delta)[1] * f_atraccion(math.dist(pos_nodo_u, pos_nodo_v)))
         #Sumar disp a posición
         for nodo in grafo.nodos:
             pos_nodo = [nodo.propiedad.get("dis_x", 0), nodo.propiedad.get("dis_y", 0)]
             disp_nodo = [nodo.propiedad.get("dis_dx", 0), nodo.propiedad.get("dis_dy", 0)]   
-            nueva_pos = [pos_nodo[0] + unit_vector(disp_nodo)[0] * disp_nodo[0], pos_nodo[1] + unit_vector(disp_nodo)[1] * disp_nodo[1]]
+            nueva_pos = [pos_nodo[0] + (unit_vector(disp_nodo)[0]) * min(disp_nodo[0]* 0.01, temp) , pos_nodo[1] + (unit_vector(disp_nodo)[1]) * min(disp_nodo[1]* 0.01, temp)]
             nodo.definir_propiedad("dis_x", min(limite_x, max(0, nueva_pos[0])))
             nodo.definir_propiedad("dis_y", min(limite_y, max(0, nueva_pos[1])))
 
