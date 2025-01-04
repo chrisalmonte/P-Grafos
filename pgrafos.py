@@ -738,7 +738,7 @@ class Distribucion:
             nodo.definir_propiedad("dis_y", random.randrange(0, limite_y))
     
     @staticmethod
-    def spring(grafo, limite_x, limite_y, c1=2, c2=200, c3=1, c4=1):
+    def spring(grafo:Grafo, limite_x:int, limite_y:int, c1=2, c2=200, c3=1, c4=1):
         """
         Iteración del algoritmo Spring para distribuir los nodos de un grafo.
         Define las propiedades de nodo "dis_x" y "dis_y".
@@ -781,41 +781,58 @@ class Distribucion:
                     nodo.definir_propiedad("dis_y", pos_nodo_1[1])
     
     @staticmethod
-    def fruchterman_reingold(grafo, limite_x, limite_y, c=1, comienzo=0, operaciones_por_frame=-1):
+    def fruchterman_reingold(grafo:Grafo, limite_x, limite_y, temp):
         """
         Iteración del algoritmo Fruchterman-Reingold para distribuir los nodos de un grafo.
         Define las propiedades de nodo "dis_x" y "dis_y".
 
         :param int limite_x: El límite superior de la coordenada horizontal.
         :param int limite_y: El límite superior de la coordenada vertical.
-        :param int comienzo: (opcional) Índice del nodo con el que se comienza el cálculo.
-        :param int operaciones_por_frame: (opcional) Número de nodos calculados. Si <= 0 se calcularán todos.
-        :param float c1: (opcional) Distancia ideal de la arista (= 20 si no se especifica).
         """
-        area = limite_x * limite_y
-        k = c * math.sqrt(area / len(grafo.nodos))
-        fin_calculo = len(grafo.nodos) if operaciones_por_frame <= 0 else (min(comienzo + operaciones_por_frame, len(grafo.nodos)))
+        if len(grafo.nodos) == 0:
+            return
+        
+        k = math.sqrt((limite_x * limite_y) / len(grafo.nodos))
+
+        def f_atraccion(magnitud):
+            return (magnitud**2)/k
+        
+        def f_repulsion(magnitud):
+            return 0 if magnitud==0 else ((k**2)/magnitud)
+        
+        def unit_vector(vector:list[float, float]):
+            magnitud = magnitud_d_vector(vector)
+            return [0,0] if magnitud <= 0 else [vector[0]/magnitud, vector[1]/magnitud]
+        
+        def magnitud_d_vector(vector:list[float, float]):
+            return math.sqrt(vector[0]**2 + vector[1]**2)
+
         #Repulsión
-        for nodo_v in grafo.nodos[comienzo:fin_calculo]:
+        for nodo_v in grafo.nodos:
             pos_nodo_v = [nodo_v.propiedad.get("dis_x", 0), nodo_v.propiedad.get("dis_y", 0)]     
             disp_nodo_v = [nodo_v.propiedad.get("dis_dx", 0), nodo_v.propiedad.get("dis_dy", 0)]
             for nodo_u in grafo.nodos:
                 if nodo_u is not nodo_v:
                     pos_nodo_u = [nodo_u.propiedad.get("dis_x", 0), nodo_u.propiedad.get("dis_y", 0)]
                     delta = [pos_nodo_v[0] - pos_nodo_u[0], pos_nodo_v[1] - pos_nodo_u[1]]
-                    magnitud_delta =  math.sqrt(delta[0]**2 + delta[1]**2)
-                    delta = [0 if magnitud_delta <= 0 else (delta[0] / magnitud_delta), 0 if magnitud_delta <= 0 else (delta[1] / magnitud_delta)]
-                    nodo_v.definir_propiedad("dis_dx", disp_nodo_v[0] + (delta[0] * -(k**2/delta[0])))
-                    nodo_v.definir_propiedad("dis_dy", disp_nodo_v[1] + (delta[1] * -(k**2/delta[1])))
+                    nodo_v.definir_propiedad("dis_dx", disp_nodo_v[0] + (unit_vector(delta)[0] * f_repulsion(magnitud_d_vector(delta))))
+                    nodo_v.definir_propiedad("dis_dy", disp_nodo_v[1] + (unit_vector(delta)[1] * f_repulsion(magnitud_d_vector(delta))))
         #Atracción
         for arista in grafo.aristas:
             pos_nodo_u = [arista.extremos[0].propiedad.get("dis_x", 0), arista.extremos[0].propiedad.get("dis_y", 0)]
+            disp_nodo_u = [arista.extremos[0].propiedad.get("dis_dx", 0), arista.extremos[0].propiedad.get("dis_dy", 0)]
             pos_nodo_v = [arista.extremos[1].propiedad.get("dis_x", 0), arista.extremos[1].propiedad.get("dis_y", 0)]
+            disp_nodo_v = [arista.extremos[1].propiedad.get("dis_dx", 0), arista.extremos[1].propiedad.get("dis_dy", 0)]
             delta = [pos_nodo_v[0] - pos_nodo_u[0], pos_nodo_v[1] - pos_nodo_u[1]]
-            magnitud_delta =  math.sqrt(delta[0]**2 + delta[1]**2)
-            delta = [0 if magnitud_delta <= 0 else (delta[0] / magnitud_delta), 0 if magnitud_delta <= 0 else (delta[1] / magnitud_delta)]
-            nodo_v.definir_propiedad("dis_dx", nodo_v.propiedad.get("dis_dx", 0) + (delta[0] * -(k**2/delta[0])))
-            nodo_v.definir_propiedad("dis_dy", nodo_v.propiedad.get("dis_dy", 0) + (delta[1] * -(k**2/delta[1])))
+            arista.extremos[1].definir_propiedad("dis_dx", disp_nodo_v[0] - unit_vector(delta)[0] * f_atraccion(magnitud_d_vector(delta)))
+            arista.extremos[1].definir_propiedad("dis_dy", disp_nodo_v[1] - unit_vector(delta)[1] * f_atraccion(magnitud_d_vector(delta)))
+            arista.extremos[0].definir_propiedad("dis_dx", disp_nodo_u[0] + unit_vector(delta)[0] * f_atraccion(magnitud_d_vector(delta)))
+            arista.extremos[0].definir_propiedad("dis_dy", disp_nodo_u[1] + unit_vector(delta)[1] * f_atraccion(magnitud_d_vector(delta)))
+        #Sumar disp a posición
+        for nodo in grafo.nodos:
+            pos_nodo = [nodo.propiedad.get("dis_x", 0), nodo.propiedad.get("dis_y", 0)]
+            disp_nodo = [nodo.propiedad.get("dis_dx", 0), nodo.propiedad.get("dis_dy", 0)]   
+            nueva_pos = [pos_nodo[0] + unit_vector(disp_nodo)[0] * disp_nodo[0], pos_nodo[1] + unit_vector(disp_nodo)[1] * disp_nodo[1]]
+            nodo.definir_propiedad("dis_x", min(limite_x, max(0, nueva_pos[0])))
+            nodo.definir_propiedad("dis_y", min(limite_y, max(0, nueva_pos[1])))
 
-
-        #https://1library.co/article/algoritmo-fruchterman-reingold-ordenaci%C3%B3n-espacial-topolog%C3%ADas-generales.q5r9j57z
