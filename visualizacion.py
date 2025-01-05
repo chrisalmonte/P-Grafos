@@ -10,10 +10,10 @@ class Metodo(Enum):
     FRUCHTERMAN = 1
 
 #Propiedades del grafo y método de distribución
-grafo = pgrafos.Grafo.generar_desde_archivo("grafos/geografico/geografico_100.gv")
+grafo = pgrafos.Grafo.generar_desde_archivo("grafos/malla/malla_100.gv")
 metodo_disposicion = Metodo.FRUCHTERMAN
 metodo_iteraciones = 50000000
-temperatura = 1650
+temperatura = 1280
 
 #Propiedades del programa
 ventana_ancho = 1280
