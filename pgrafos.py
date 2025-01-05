@@ -683,7 +683,6 @@ class Arista:
     Una clase que representa una Arista.
 
     Attributes:
-        identificador: ID del nodo. Único dentro del grafo. Puede ser de cualquier tipo (str, int, etc..), pero deberá buscarse de la misma manera.
         propiedad (dict): Diccionario con las propiedades de la arista (key:value).
         extremos (Nodo, Nodo): Tupla de los nodos que conecta la arista. [0] es el nodo inicial, [1] es el final.
     """
@@ -740,6 +739,7 @@ class Distribucion:
         Iteración del algoritmo Spring para distribuir los nodos de un grafo.
         Define las propiedades de nodo "dis_x" y "dis_y".
 
+        :param Grafo grafo: Grafo a distribuir.
         :param int limite_x: El límite superior de la coordenada horizontal.
         :param int limite_y: El límite superior de la coordenada vertical.
         :param float c1: (opcional) Constante de atracción (= 2 si no se especifica).
@@ -783,6 +783,7 @@ class Distribucion:
         Iteración del algoritmo Fruchterman-Reingold para distribuir los nodos de un grafo.
         Define las propiedades de nodo "dis_x" y "dis_y".
 
+        :param Grafo grafo: Grafo a distribuir.
         :param int limite_x: El límite superior de la coordenada horizontal.
         :param int limite_y: El límite superior de la coordenada vertical
         :param int c: (opcional) Multiplica k para aumentar o disminuir las fuerzas.
@@ -855,6 +856,7 @@ class Distribucion:
         Iteración del algoritmo Fruchterman-Reingold para distribuir los nodos de un grafo.
         Define las propiedades de nodo "dis_x" y "dis_y".
 
+        :param Grafo grafo: Grafo a distribuir.
         :param int limite_x: El límite superior de la coordenada horizontal.
         :param int limite_y: El límite superior de la coordenada vertical.
         :param int radio_nodo: Radio del nodo.
