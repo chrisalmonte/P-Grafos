@@ -781,22 +781,21 @@ class Distribucion:
                     nodo.definir_propiedad("dis_y", pos_nodo_1[1])
     
     @staticmethod
-    def fruchterman_reingold(grafo:Grafo, limite_x, limite_y, temp, c=3, mult_repulsion=6, mult_atraccion=1.4, radio_fuerza=700):
+    def fruchterman_reingold(grafo:Grafo, limite_x:int, limite_y:int, c=1, radio_fuerza=55, distancia_min_arista=10):
         """
         Iteración del algoritmo Fruchterman-Reingold para distribuir los nodos de un grafo.
         Define las propiedades de nodo "dis_x" y "dis_y".
 
         :param int limite_x: El límite superior de la coordenada horizontal.
         :param int limite_y: El límite superior de la coordenada vertical
-        :param int temp: Valor de "temperatura".
-        :param int distancia_ideal: Distancia a la que un nodo puede afectar a otro.
+        :param int c: (opcional) Multiplica k para aumentar o disminuir las fuerzas.
+        :param int radio_fuerza: (opcional) Distancia a la que un nodo puede afectar a otro.
+        :param int distancia_min_arista: (opcional) Distancia a la que se dejan de atraer los nodos.
         """
         if len(grafo.nodos) == 0:
             return
         
-        distancia_min_arista = 10
-        
-        k = math.sqrt((limite_x * limite_y) / len(grafo.nodos))
+        k = c * math.sqrt((limite_x * limite_y) / len(grafo.nodos))
 
         def f_atraccion(magnitud):
             return (magnitud**2)/k

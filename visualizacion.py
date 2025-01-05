@@ -12,8 +12,7 @@ class Metodo(Enum):
 #Propiedades del grafo y método de distribución
 grafo = pgrafos.Grafo.generar_desde_archivo("grafos/malla/malla_100.gv")
 metodo_disposicion = Metodo.FRUCHTERMAN
-metodo_iteraciones = 50000000
-temperatura = 1280
+metodo_iteraciones = 500000
 
 #Propiedades del programa
 ventana_ancho = 1280
@@ -32,14 +31,11 @@ def calcular_posiciones(grafo):
             case Metodo.SPRING:
                 pgrafos.Distribucion.spring(grafo, ventana_ancho - nodo_radio, ventana_alto - nodo_radio, c1=110, c2=15, c3=6, c4=0.01)
             case Metodo.FRUCHTERMAN:
-                global temperatura
-                pgrafos.Distribucion.fruchterman_reingold(grafo, ventana_ancho - nodo_radio, ventana_alto - nodo_radio, temperatura)
-                temperatura = max(0, temperatura - 1)
+                pgrafos.Distribucion.fruchterman_reingold(grafo, ventana_ancho-nodo_radio, ventana_alto-nodo_radio, radio_fuerza=50, c=4)
             case _:
                 print("No se ha especificado un método de distribución. \nSe usará la distribución aleatoria.")
                 metodo_iteraciones = 0
                 return
-
         metodo_iteraciones -= 1
 
 def dibujar_grafo(surface, grafo):
@@ -70,7 +66,8 @@ while ejecutandose:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             ejecutandose = False
-    
+
+    #Posicionar nodos
     pantalla.fill(ventana_color)
     calcular_posiciones(grafo)
     dibujar_grafo(pantalla, grafo)
@@ -81,4 +78,3 @@ while ejecutandose:
     #Limitar FPS y calcular Delta Time
     delta_time = clock.tick(60) / 1000
 pygame.quit()
-
