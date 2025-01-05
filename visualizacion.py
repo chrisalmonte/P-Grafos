@@ -8,10 +8,11 @@ from enum import Enum
 class Metodo(Enum):
     SPRING = 0
     FRUCHTERMAN = 1
+    BARNES = 2
 
 #Propiedades del grafo y método de distribución
 grafo = pgrafos.Grafo.generar_desde_archivo("grafos/malla/malla_100.gv")
-metodo_disposicion = Metodo.FRUCHTERMAN
+metodo_disposicion = Metodo.BARNES
 metodo_iteraciones = 5000
 
 #Propiedades del programa
@@ -30,8 +31,17 @@ def calcular_posiciones(grafo):
         match metodo_disposicion:
             case Metodo.SPRING:
                 pgrafos.Distribucion.spring(grafo, ventana_ancho - nodo_radio, ventana_alto - nodo_radio, c1=110, c2=15, c3=6, c4=0.01)
+            
             case Metodo.FRUCHTERMAN:
                 pgrafos.Distribucion.fruchterman_reingold(grafo, ventana_ancho-nodo_radio, ventana_alto-nodo_radio, radio_fuerza=50, c=8)
+            
+            case Metodo.BARNES:
+                quadtree = pgrafos.Distribucion.barnes_hut(grafo, ventana_ancho, ventana_alto, nodo_radio)
+                for nodo in quadtree.nodos:
+                    posicion = nodo.propiedad.get("posicion", (0, 0))
+                    tamano = nodo.propiedad.get("tamano", 0)
+                    pygame.draw.rect(pantalla, pygame.Color(255,255,255,90), pygame.Rect(posicion[0], posicion[1], tamano, tamano), width=1)
+            
             case _:
                 print("No se ha especificado un método de distribución. \nSe usará la distribución aleatoria.")
                 metodo_iteraciones = 0
@@ -43,7 +53,6 @@ def dibujar_grafo(surface, grafo):
         inicio = (arista.extremos[0].propiedad.get("dis_x", 0), arista.extremos[0].propiedad.get("dis_y", 0))
         fin = (arista.extremos[1].propiedad.get("dis_x", 0), arista.extremos[1].propiedad.get("dis_y", 0))
         pygame.draw.line(surface, arista_color, inicio, fin, arista_ancho)
-
     for nodo in grafo.nodos:
         surface.blit(nodo_sprite, dest=(nodo.propiedad.get("dis_x", 0) - nodo_radio, nodo.propiedad.get("dis_y", 0) - nodo_radio))
 

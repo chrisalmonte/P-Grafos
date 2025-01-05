@@ -1,11 +1,8 @@
+#Módulo con las clases de Grafo, Arista, Nodo y Distribución.
+
 import random
 import math
 import os
-
-#TODO: 
-# Regresar Falso cuando el grafo es no dirigido y los algoritmos no lo soportan.
-# Ver si el grafo no contiene 0 nodos y regresar none
-# Cargar archivos con atributos
 
 class Grafo:
     """
@@ -851,4 +848,75 @@ class Distribucion:
             pos_nodo[1] = max(0, min(limite_y, pos_nodo[1] + desp_nodo[1]))
             nodo.definir_propiedad("dis_x", pos_nodo[0])
             nodo.definir_propiedad("dis_y", pos_nodo[1])
+
+    @staticmethod
+    def barnes_hut(grafo:Grafo, limite_x:int, limite_y:int, radio_nodo:int, quadtree_max=20):
+        """
+        Iteración del algoritmo Fruchterman-Reingold para distribuir los nodos de un grafo.
+        Define las propiedades de nodo "dis_x" y "dis_y".
+
+        :param int limite_x: El límite superior de la coordenada horizontal.
+        :param int limite_y: El límite superior de la coordenada vertical.
+        :param int radio_nodo: Radio del nodo.
+        :param int quadtree_max: (opcional) Profundidad máxima del árbol de cuadrantes. 20 si no se especifica.
+        :return: Grafo que representa al Quadtree. Cada nodo representa un cuadrante. Si no hay nodos se retornará un quadtree vacío.
+        :rtype: Grafo 
+        """
+        quadtree = Grafo(True)
+        
+        if len(grafo.nodos) == 0:
+            return quadtree        
+        
+        def subdividir_quad(quad_raiz):
+            tamano = quad_raiz.propiedad["tamano"] / 2
+            origen = quad_raiz.propiedad["posicion"]
+            nodos_dentro = quad_raiz.propiedad["nodos"]
+            #Noroeste
+            nodos_no = []
+            quad_no = len(quadtree.nodos)
+            quadtree.crear_nodo(quad_no, tamano=tamano, posicion=origen)
+            quadtree.conectar_nodos(quad_raiz.identificador, quad_no)
+            #Noreste
+            nodos_ne = []
+            quad_ne = len(quadtree.nodos)
+            quadtree.crear_nodo(quad_ne, tamano=tamano, posicion=(origen[0] + tamano, origen[1]))
+            quadtree.conectar_nodos(quad_raiz.identificador, quad_ne)
+            #Suroeste
+            nodos_so = []
+            quad_so = len(quadtree.nodos)
+            quadtree.crear_nodo(quad_so, tamano=tamano, posicion=(origen[0], origen[1] + tamano))
+            quadtree.conectar_nodos(quad_raiz.identificador, quad_so)
+            #Sureste
+            nodos_se = []
+            quad_se = len(quadtree.nodos)
+            quadtree.crear_nodo(quad_se , tamano=tamano, posicion=(origen[0] + tamano, origen[1] + tamano))
+            quadtree.conectar_nodos(quad_raiz.identificador, quad_se )
+            #Checar intersecciones
+            for nodo in nodos_dentro:
+                pos_nodo = [nodo.propiedad.get("dis_x", 0) + radio_nodo, nodo.propiedad.get("dis_y", 0) + radio_nodo]
+                if pos_nodo[0] < (origen[0] + tamano):
+                    if pos_nodo[1] < (origen[1] + tamano):
+                        nodos_no.append(nodo)
+                    else: 
+                        nodos_so.append(nodo)
+                else:
+                    if pos_nodo[1] < (origen[1] + tamano):
+                        nodos_ne.append(nodo)
+                    else:
+                        nodos_se.append(nodo)
+            #Agregar nodos al quad
+            quadtree.get_nodo(quad_no).definir_propiedad("nodos", nodos_no)
+            quadtree.get_nodo(quad_ne).definir_propiedad("nodos", nodos_ne)
+            quadtree.get_nodo(quad_so).definir_propiedad("nodos", nodos_so)
+            quadtree.get_nodo(quad_se).definir_propiedad("nodos", nodos_se)
+            quad_raiz.definir_propiedad("nodos", [])
+
+        quadtree.crear_nodo(0, tamano=limite_x, posicion=(0,0), nodos=grafo.nodos)
+        subdividir_quad(quadtree.get_nodo(0))
+
+        for quad in quadtree.nodos:
+            nodos = quad.propiedad.get("nodos", [])
+            if len(nodos) > 1 and quad.propiedad.get("tamano", 0) > radio_nodo:
+                subdividir_quad(quad)
+        return quadtree
             
