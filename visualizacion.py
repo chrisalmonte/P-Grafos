@@ -12,7 +12,7 @@ class Metodo(Enum):
 #Propiedades del grafo y método de distribución
 grafo = pgrafos.Grafo.generar_desde_archivo("grafos/malla/malla_100.gv")
 metodo_disposicion = Metodo.FRUCHTERMAN
-metodo_iteraciones = 500000
+metodo_iteraciones = 5000
 
 #Propiedades del programa
 ventana_ancho = 1280
@@ -31,7 +31,7 @@ def calcular_posiciones(grafo):
             case Metodo.SPRING:
                 pgrafos.Distribucion.spring(grafo, ventana_ancho - nodo_radio, ventana_alto - nodo_radio, c1=110, c2=15, c3=6, c4=0.01)
             case Metodo.FRUCHTERMAN:
-                pgrafos.Distribucion.fruchterman_reingold(grafo, ventana_ancho-nodo_radio, ventana_alto-nodo_radio, radio_fuerza=50, c=4)
+                pgrafos.Distribucion.fruchterman_reingold(grafo, ventana_ancho-nodo_radio, ventana_alto-nodo_radio, radio_fuerza=50, c=8)
             case _:
                 print("No se ha especificado un método de distribución. \nSe usará la distribución aleatoria.")
                 metodo_iteraciones = 0
