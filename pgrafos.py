@@ -893,7 +893,7 @@ class Distribucion:
             quadtree.conectar_nodos(quad_raiz.identificador, quad_se )
             #Checar intersecciones
             for nodo in nodos_dentro:
-                pos_nodo = [nodo.propiedad.get("dis_x", 0) + radio_nodo, nodo.propiedad.get("dis_y", 0) + radio_nodo]
+                pos_nodo = [nodo.propiedad.get("dis_x", 0), nodo.propiedad.get("dis_y", 0)]
                 if pos_nodo[0] < (origen[0] + tamano):
                     if pos_nodo[1] < (origen[1] + tamano):
                         nodos_no.append(nodo)

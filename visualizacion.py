@@ -40,7 +40,7 @@ def calcular_posiciones(grafo):
                 for nodo in quadtree.nodos:
                     posicion = nodo.propiedad.get("posicion", (0, 0))
                     tamano = nodo.propiedad.get("tamano", 0)
-                    pygame.draw.rect(pantalla, pygame.Color(255,255,255,90), pygame.Rect(posicion[0], posicion[1], tamano, tamano), width=1)
+                    pygame.draw.rect(pantalla, pygame.Color(130,130,130), pygame.Rect(posicion[0], posicion[1], tamano, tamano), width=1)
             
             case _:
                 print("No se ha especificado un método de distribución. \nSe usará la distribución aleatoria.")
