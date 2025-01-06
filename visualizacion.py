@@ -11,7 +11,7 @@ class Metodo(Enum):
     BARNES = 2
 
 #Propiedades del grafo y método de distribución
-grafo = pgrafos.Grafo.generar_desde_archivo("grafos/malla/malla_100.gv")
+grafo = pgrafos.Grafo.generar_desde_archivo("grafos/malla/malla_500.gv")
 metodo_disposicion = Metodo.BARNES
 metodo_iteraciones = 5000
 
@@ -37,6 +37,7 @@ def calcular_posiciones(grafo):
             
             case Metodo.BARNES:
                 quadtree = pgrafos.Distribucion.barnes_hut(grafo, ventana_ancho, ventana_alto, nodo_radio)
+                #Dibujar Quadtree
                 for nodo in quadtree.nodos:
                     posicion = nodo.propiedad.get("posicion", (0, 0))
                     tamano = nodo.propiedad.get("tamano", 0)
