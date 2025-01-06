@@ -14,7 +14,6 @@ class Metodo(Enum):
 grafo = pgrafos.Grafo.generar_desde_archivo("grafos/Barbasi-Albert/BarbasiAlbert_variante_100.gv")
 metodo_disposicion = Metodo.BARNES
 metodo_iteraciones = 5000
-temperatura = 100
 
 #Propiedades del programa
 ventana_ancho = 1280
