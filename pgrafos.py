@@ -997,15 +997,14 @@ class Distribucion:
             delta = [distribucion_masa_arbol[1][0] - pos_nodo[0], distribucion_masa_arbol[1][1] - pos_nodo[1]]
             direccion = direccion_vector(delta)
             fuerza = fuerza_barnes_hut(pos_nodo, quadtree.get_nodo(0))
-            nodo.definir_propiedad("dis_dx" ,desp_nodo[0] + (direccion[0] * fuerza))
-            nodo.definir_propiedad("dis_dy" ,desp_nodo[1] + (direccion[1] * fuerza))
+            nodo.definir_propiedad("dis_dx" ,desp_nodo[0] - (direccion[0] * fuerza))
+            nodo.definir_propiedad("dis_dy" ,desp_nodo[1] - (direccion[1] * fuerza))
 
         #Aplicar fuerzas
         for nodo in grafo.nodos:
             for nodo_u in grafo.nodos:
                 pos_nodo = [nodo.propiedad["dis_x"], nodo.propiedad["dis_y"]]
                 desp_nodo = [nodo.propiedad["dis_dx"], nodo.propiedad["dis_dy"]]
-                #Sumar desplpazamiento a posicion
                 nodo.definir_propiedad("dis_x", max(0, min(limite_x, pos_nodo[0] + desp_nodo[0])))
                 nodo.definir_propiedad("dis_y", max(0, min(limite_y, pos_nodo[1] + desp_nodo[1])))
         return quadtree
