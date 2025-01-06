@@ -851,7 +851,7 @@ class Distribucion:
             nodo.definir_propiedad("dis_y", pos_nodo[1])
 
     @staticmethod
-    def barnes_hut(grafo:Grafo, limite_x:int, limite_y:int, radio_nodo:int, quadtree_max=20, longitud_arista=10, theta=1, gravedad=2):
+    def barnes_hut(grafo:Grafo, limite_x:int, limite_y:int, radio_nodo:int, quadtree_max=20, longitud_arista=10, theta=1, f_repulsion=1, gravedad=1):
         """
         Iteración del algoritmo Fruchterman-Reingold para distribuir los nodos de un grafo.
         Define las propiedades de nodo "dis_x" y "dis_y".
@@ -939,6 +939,27 @@ class Distribucion:
                     centro[0] += direccion[0] * distribucion_hijo[0]
                     centro[1] += direccion[1] * distribucion_hijo[0]
             return [masa, centro]
+        
+        def fuerza_barnes_hut(pos_nodo, quad):
+            fuerza = 0
+            if len(quad.vecinos) == 0:
+                nodos_contenidos = quad.propiedad.get("nodos", [])
+                pos_nodo_final = [nodos_contenidos[0].propiedad.get("dis_x", 0), nodos_contenidos[0].propiedad.get("dis_y", 0)]
+                fuerza = (f_repulsion/(math.dist(pos_nodo, pos_nodo_final) or 0.01))
+                return fuerza
+            
+            quad_masa = quad.propiedad["distribucion_masa"]
+            r = math.dist(pos_nodo, quad_masa[1]) or 0.1
+            d = quad.propiedad["tamano"]
+            if (d/r) < theta:
+                return (f_repulsion * quad_masa[0]/math.dist(pos_nodo, quad_masa[1]))
+                       
+            for hijo in quad.vecinos:
+                hijo = hijo[0]
+                if hijo.vecinos or hijo.propiedad.get("nodos", []): 
+                    fuerza += fuerza_barnes_hut(pos_nodo, hijo)
+            return fuerza
+            
 
         #Crear quadtree
         quadtree.crear_nodo(0, tamano=limite_x, posicion=(0,0), nodos=grafo.nodos)
@@ -950,6 +971,7 @@ class Distribucion:
 
         #Calcular Barnes-Hut
         distribucion_masa_arbol = distribucion_masa(quadtree.get_nodo(0))
+        quadtree.get_nodo(0).definir_propiedad("distribucion_masa", distribucion_masa_arbol)
         
         #Atraccion
         for arista in grafo.aristas:
@@ -959,28 +981,33 @@ class Distribucion:
             pos_nodo_u = [nodo_u.propiedad.get("dis_x", 0), nodo_u.propiedad.get("dis_y", 0)]
             distancia = math.dist(pos_nodo_v, pos_nodo_u)
             if distancia > longitud_arista:
-                fuerza = longitud_arista - math.dist(pos_nodo_v, pos_nodo_u) * (1/max(1,min(len(nodo_u.vecinos), len(nodo_v.vecinos)))) 
+                fuerza = (longitud_arista - math.dist(pos_nodo_v, pos_nodo_u) * (1/max(1,min(len(nodo_u.vecinos), len(nodo_v.vecinos))))) * gravedad 
                 delta = [pos_nodo_v[0] - pos_nodo_u[0], pos_nodo_v[1] - pos_nodo_u[1]]
                 magnitud = math.sqrt(delta[0]**2 + delta[1]**2)
                 direccion = [delta[0]/magnitud, delta[1]/magnitud]
-                nodo_u.definir_propiedad("dis_dx", direccion[0] * fuerza)
-                nodo_u.definir_propiedad("dis_dy", direccion[1] * fuerza)
+                nodo_u.definir_propiedad("dis_dx", -direccion[0] * fuerza)
+                nodo_u.definir_propiedad("dis_dy", -direccion[1] * fuerza)
                 nodo_v.definir_propiedad("dis_dx", direccion[0] * fuerza)
                 nodo_v.definir_propiedad("dis_dy", direccion[1] * fuerza)
         
-        #BarnesHut
-        
+        #Repulsion con BarnesHut
+        for nodo in grafo.nodos:
+            desp_nodo = [nodo.propiedad.get("dis_dx", 0), nodo.propiedad.get("dis_dy", 0)]
+            pos_nodo = [nodo.propiedad.get("dis_x", 0), nodo.propiedad.get("dis_y", 0)]
+            delta = [distribucion_masa_arbol[1][0] - pos_nodo[0], distribucion_masa_arbol[1][1] - pos_nodo[1]]
+            direccion = direccion_vector(delta)
+            fuerza = fuerza_barnes_hut(pos_nodo, quadtree.get_nodo(0))
+            nodo.definir_propiedad("dis_dx" ,desp_nodo[0] + (direccion[0] * fuerza))
+            nodo.definir_propiedad("dis_dy" ,desp_nodo[1] + (direccion[1] * fuerza))
 
         #Aplicar fuerzas
-        #for nodo in grafo.nodos:
-        #    #Repulsion
-        #    for nodo_u in grafo.nodos:
-        #        desp = [nodo.propiedad.get("dis_dx", 0), nodo.propiedad.get("dis_dy", 0)]
-        #        nodo.definir_propiedad("dis_x", desp[0])
-        #        nodo.definir_propiedad("dis_y", desp[1])
-
-        
-        
+        for nodo in grafo.nodos:
+            for nodo_u in grafo.nodos:
+                pos_nodo = [nodo.propiedad["dis_x"], nodo.propiedad["dis_y"]]
+                desp_nodo = [nodo.propiedad["dis_dx"], nodo.propiedad["dis_dy"]]
+                #Sumar desplpazamiento a posicion
+                nodo.definir_propiedad("dis_x", max(0, min(limite_x, pos_nodo[0] + desp_nodo[0])))
+                nodo.definir_propiedad("dis_y", max(0, min(limite_y, pos_nodo[1] + desp_nodo[1])))
         return quadtree
 
         
