@@ -861,7 +861,10 @@ class Distribucion:
         :param int limite_y: El límite superior de la coordenada vertical.
         :param int radio_nodo: Radio del nodo.
         :param float delta_time: Tiempo en segundos del último fotograma
-        :param int quadtree_max: (opcional) Profundidad máxima del árbol de cuadrantes. 20 si no se especifica.
+        :param int longitud_arista: (opcional) Límite de contracción de las aristas.
+        :param float theta: (opcional) Debajo de este valor, se calcula el agregado de nodos en lugar de cada nodo individual.
+        :param float f_repulsion: (opcional) Multiplicador de la fuerza de repulsión.
+        :param float gravedad: (opcional) Multiplicador de la fuerza de atracción.
         :return: Grafo que representa al Quadtree. Cada nodo representa un cuadrante. Si no hay nodos se retornará un quadtree vacío.
         :rtype: Grafo 
         """
