@@ -851,7 +851,7 @@ class Distribucion:
             nodo.definir_propiedad("dis_y", pos_nodo[1])
 
     @staticmethod
-    def barnes_hut(grafo:Grafo, limite_x:int, limite_y:int, radio_nodo:int, quadtree_max=20, longitud_arista=10, theta=1, f_repulsion=1, gravedad=1):
+    def barnes_hut(grafo:Grafo, limite_x:int, limite_y:int, radio_nodo:int, delta_time:float, longitud_arista=10, theta=1, f_repulsion=0.01, gravedad=0.001):
         """
         Iteración del algoritmo Fruchterman-Reingold para distribuir los nodos de un grafo.
         Define las propiedades de nodo "dis_x" y "dis_y".
@@ -860,6 +860,7 @@ class Distribucion:
         :param int limite_x: El límite superior de la coordenada horizontal.
         :param int limite_y: El límite superior de la coordenada vertical.
         :param int radio_nodo: Radio del nodo.
+        :param float delta_time: Tiempo en segundos del último fotograma
         :param int quadtree_max: (opcional) Profundidad máxima del árbol de cuadrantes. 20 si no se especifica.
         :return: Grafo que representa al Quadtree. Cada nodo representa un cuadrante. Si no hay nodos se retornará un quadtree vacío.
         :rtype: Grafo 
@@ -1005,8 +1006,8 @@ class Distribucion:
             for nodo_u in grafo.nodos:
                 pos_nodo = [nodo.propiedad["dis_x"], nodo.propiedad["dis_y"]]
                 desp_nodo = [nodo.propiedad["dis_dx"], nodo.propiedad["dis_dy"]]
-                nodo.definir_propiedad("dis_x", max(0, min(limite_x, pos_nodo[0] + desp_nodo[0])))
-                nodo.definir_propiedad("dis_y", max(0, min(limite_y, pos_nodo[1] + desp_nodo[1])))
+                nodo.definir_propiedad("dis_x", max(0, min(limite_x - radio_nodo, pos_nodo[0] + desp_nodo[0] * delta_time)))
+                nodo.definir_propiedad("dis_y", max(0, min(limite_y - radio_nodo, pos_nodo[1] + desp_nodo[1] * delta_time)))
         return quadtree
 
         
