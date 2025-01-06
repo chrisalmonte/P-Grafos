@@ -11,9 +11,10 @@ class Metodo(Enum):
     BARNES = 2
 
 #Propiedades del grafo y método de distribución
-grafo = pgrafos.Grafo.generar_desde_archivo("grafos/malla/malla_100.gv")
+grafo = pgrafos.Grafo.generar_desde_archivo("grafos/Barbasi-Albert/BarbasiAlbert_variante_100.gv")
 metodo_disposicion = Metodo.BARNES
 metodo_iteraciones = 5000
+temperatura = 100
 
 #Propiedades del programa
 ventana_ancho = 1280
@@ -36,7 +37,7 @@ def calcular_posiciones(grafo):
                 pgrafos.Distribucion.fruchterman_reingold(grafo, ventana_ancho-nodo_radio, ventana_alto-nodo_radio, radio_fuerza=50, c=8)
             
             case Metodo.BARNES:
-                quadtree = pgrafos.Distribucion.barnes_hut(grafo, ventana_ancho, ventana_alto, nodo_radio, f_repulsion=0.001, gravedad=0.01)
+                quadtree = pgrafos.Distribucion.barnes_hut(grafo, ventana_ancho, ventana_alto, nodo_radio, delta_time, f_repulsion=0.1, gravedad=0.1)
                 #Dibujar Quadtree
                 for nodo in quadtree.nodos:
                     posicion = nodo.propiedad.get("posicion", (0, 0))
