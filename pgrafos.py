@@ -1,11 +1,8 @@
+#Módulo con las clases de Grafo, Arista, Nodo y Distribución.
+
 import random
 import math
 import os
-
-#TODO: 
-# Regresar Falso cuando el grafo es no dirigido y los algoritmos no lo soportan.
-# Ver si el grafo no contiene 0 nodos y regresar none
-# Cargar archivos con atributos
 
 class Grafo:
     """
@@ -686,7 +683,6 @@ class Arista:
     Una clase que representa una Arista.
 
     Attributes:
-        identificador: ID del nodo. Único dentro del grafo. Puede ser de cualquier tipo (str, int, etc..), pero deberá buscarse de la misma manera.
         propiedad (dict): Diccionario con las propiedades de la arista (key:value).
         extremos (Nodo, Nodo): Tupla de los nodos que conecta la arista. [0] es el nodo inicial, [1] es el final.
     """
@@ -738,22 +734,20 @@ class Distribucion:
             nodo.definir_propiedad("dis_y", random.randrange(0, limite_y))
     
     @staticmethod
-    def spring(grafo, limite_x, limite_y, c1=2, c2=200, c3=1, c4=1, comienzo=0, operaciones_por_frame=-1):
+    def spring(grafo:Grafo, limite_x:int, limite_y:int, c1=2, c2=200, c3=1, c4=1):
         """
         Iteración del algoritmo Spring para distribuir los nodos de un grafo.
         Define las propiedades de nodo "dis_x" y "dis_y".
 
+        :param Grafo grafo: Grafo a distribuir.
         :param int limite_x: El límite superior de la coordenada horizontal.
         :param int limite_y: El límite superior de la coordenada vertical.
         :param float c1: (opcional) Constante de atracción (= 2 si no se especifica).
         :param float c2: (opcional) Distancia ideal de la arista (= 200 si no se especifica).
         :param float c3: (opcional) Constante de repulsión (= 1 si no se especifica).
-        :param float c3: (opcional) Multiplicador de fuerza (= 1 si no se especifica).
-        :param int comienzo: (opcional) Índice del nodo con el que se comienza el cálculo.
-        :param int operaciones_por_frame: (opcional) Número de nodos calculados. Si <= 0 se calcularán todos. 
+        :param float c4: (opcional) Multiplicador de fuerza (= 1 si no se especifica).
         """
-        fin_calculo = len(grafo.nodos) if operaciones_por_frame <= 0 else (min(comienzo + operaciones_por_frame, len(grafo.nodos)))
-        for nodo in grafo.nodos[comienzo:fin_calculo]:
+        for nodo in grafo.nodos:
             pos_nodo_1 = [nodo.propiedad.get("dis_x", 0), nodo.propiedad.get("dis_y", 0)]
             vecinos = []
             #Atracción
@@ -782,3 +776,242 @@ class Distribucion:
                     pos_nodo_1 = [max(0, min(limite_x, pos_nodo_1[0])), max(0, min(limite_y, pos_nodo_1[1]))]
                     nodo.definir_propiedad("dis_x", pos_nodo_1[0])
                     nodo.definir_propiedad("dis_y", pos_nodo_1[1])
+    
+    @staticmethod
+    def fruchterman_reingold(grafo:Grafo, limite_x:int, limite_y:int, c=1, radio_fuerza=55, distancia_min_arista=10):
+        """
+        Iteración del algoritmo Fruchterman-Reingold para distribuir los nodos de un grafo.
+        Define las propiedades de nodo "dis_x" y "dis_y".
+
+        :param Grafo grafo: Grafo a distribuir.
+        :param int limite_x: El límite superior de la coordenada horizontal.
+        :param int limite_y: El límite superior de la coordenada vertical
+        :param int c: (opcional) Multiplica k para aumentar o disminuir las fuerzas.
+        :param int radio_fuerza: (opcional) Distancia a la que un nodo puede afectar a otro.
+        :param int distancia_min_arista: (opcional) Distancia a la que se dejan de atraer los nodos.
+        """
+        if len(grafo.nodos) == 0:
+            return
+        
+        k = c * math.sqrt((limite_x * limite_y) / len(grafo.nodos))
+
+        def f_atraccion(magnitud):
+            return (magnitud**2)/k
+        
+        def f_repulsion(magnitud):
+            magnitud = 0.001 if magnitud==0 else magnitud
+            return (k**2)/magnitud
+        
+        def direccion_vector(vector:list[float, float]):
+            magnitud = magnitud_vector(vector)
+            return [1, 1] if magnitud == 0 else [vector[0]/magnitud, vector[1]/magnitud]
+        
+        def magnitud_vector(vector:list[float, float]):
+            return math.sqrt(vector[0]**2 + vector[1]**2)
+
+        #Repulsión
+        for nodo_v in grafo.nodos:
+            pos_nodo_v = [nodo_v.propiedad.get("dis_x", 0), nodo_v.propiedad.get("dis_y", 0)]     
+            desp_nodo_v = [0, 0]
+            for nodo_u in grafo.nodos:
+                if nodo_u.identificador != nodo_v.identificador:
+                    pos_nodo_u = [nodo_u.propiedad.get("dis_x", 0), nodo_u.propiedad.get("dis_y", 0)]
+                    distancia = math.dist(pos_nodo_u, pos_nodo_v) 
+                    if distancia < radio_fuerza:
+                        delta = [pos_nodo_v[0] - pos_nodo_u[0], pos_nodo_v[1] - pos_nodo_u[1]]
+                        repulsion = f_repulsion(distancia)
+                        direccion = direccion_vector(delta)
+                        nodo_v.definir_propiedad("dis_fx", desp_nodo_v[0] + (direccion[0] * repulsion))
+                        nodo_v.definir_propiedad("dis_fy", desp_nodo_v[1] + (direccion[1] * repulsion))
+        #Atracción
+        for arista in grafo.aristas:
+            pos_nodo_u = [arista.extremos[0].propiedad.get("dis_x", 0), arista.extremos[0].propiedad.get("dis_y", 0)]
+            pos_nodo_v = [arista.extremos[1].propiedad.get("dis_x", 0), arista.extremos[1].propiedad.get("dis_y", 0)]
+            distancia = math.dist(pos_nodo_u, pos_nodo_v)
+            if distancia > distancia_min_arista:
+                desp_nodo_u = [arista.extremos[0].propiedad.get("dis_fx", 0), arista.extremos[0].propiedad.get("dis_fy", 0)]
+                desp_nodo_v = [arista.extremos[1].propiedad.get("dis_fx", 0), arista.extremos[1].propiedad.get("dis_fy", 0)]
+                delta = [pos_nodo_v[0] - pos_nodo_u[0], pos_nodo_v[1] - pos_nodo_u[1]]
+                direccion = direccion_vector(delta)
+                atraccion = f_atraccion(distancia)
+                arista.extremos[1].definir_propiedad("dis_fx", desp_nodo_v[0] - direccion[0] * atraccion)
+                arista.extremos[1].definir_propiedad("dis_fy", desp_nodo_v[1] - direccion[1] * atraccion)
+                arista.extremos[0].definir_propiedad("dis_fx", desp_nodo_u[0] + direccion[0] * atraccion)
+                arista.extremos[0].definir_propiedad("dis_fy", desp_nodo_u[1] + direccion[1] * atraccion)        
+        #Sumar desplazamiento a posición
+        for nodo in grafo.nodos:
+            pos_nodo = [nodo.propiedad.get("dis_x", 0), nodo.propiedad.get("dis_y", 0)]
+            desp_nodo = [nodo.propiedad.get("dis_fx", 0), nodo.propiedad.get("dis_fy", 0)]   
+            magnitud = magnitud_vector(desp_nodo)
+            magnitud = max(magnitud, k)
+            desp_nodo = [(desp_nodo[0] / magnitud), (desp_nodo[1] / magnitud)]
+            pos_nodo[0] = max(0, min(limite_x, pos_nodo[0] + desp_nodo[0]))
+            pos_nodo[1] = max(0, min(limite_y, pos_nodo[1] + desp_nodo[1]))
+            nodo.definir_propiedad("dis_x", pos_nodo[0])
+            nodo.definir_propiedad("dis_y", pos_nodo[1])
+
+    @staticmethod
+    def barnes_hut(grafo:Grafo, limite_x:int, limite_y:int, radio_nodo:int, delta_time:float, longitud_arista=10, theta=1, f_repulsion=0.01, gravedad=0.001):
+        """
+        Iteración del algoritmo Fruchterman-Reingold para distribuir los nodos de un grafo.
+        Define las propiedades de nodo "dis_x" y "dis_y".
+
+        :param Grafo grafo: Grafo a distribuir.
+        :param int limite_x: El límite superior de la coordenada horizontal.
+        :param int limite_y: El límite superior de la coordenada vertical.
+        :param int radio_nodo: Radio del nodo.
+        :param float delta_time: Tiempo en segundos del último fotograma
+        :param int longitud_arista: (opcional) Límite de contracción de las aristas.
+        :param float theta: (opcional) Debajo de este valor, se calcula el agregado de nodos en lugar de cada nodo individual.
+        :param float f_repulsion: (opcional) Multiplicador de la fuerza de repulsión.
+        :param float gravedad: (opcional) Multiplicador de la fuerza de atracción.
+        :return: Grafo que representa al Quadtree. Cada nodo representa un cuadrante. Si no hay nodos se retornará un quadtree vacío.
+        :rtype: Grafo 
+        """
+        quadtree = Grafo(True)
+        
+        if len(grafo.nodos) == 0:
+            return quadtree
+
+        def direccion_vector(vector:list[float, float]):
+            magnitud = magnitud_vector(vector)
+            return [0, 0] if magnitud == 0 else [vector[0]/magnitud, vector[1]/magnitud]
+        
+        def magnitud_vector(vector:list[float, float]):
+            return math.sqrt(vector[0]**2 + vector[1]**2)     
+        
+        def subdividir_quad(quad_raiz):
+            tamano = quad_raiz.propiedad["tamano"] / 2
+            origen = quad_raiz.propiedad["posicion"]
+            nodos_dentro = quad_raiz.propiedad["nodos"]
+            #Noroeste
+            nodos_no = []
+            quad_no = len(quadtree.nodos)
+            quadtree.crear_nodo(quad_no, tamano=tamano, posicion=origen)
+            quadtree.conectar_nodos(quad_raiz.identificador, quad_no)
+            #Noreste
+            nodos_ne = []
+            quad_ne = len(quadtree.nodos)
+            quadtree.crear_nodo(quad_ne, tamano=tamano, posicion=(origen[0] + tamano, origen[1]))
+            quadtree.conectar_nodos(quad_raiz.identificador, quad_ne)
+            #Suroeste
+            nodos_so = []
+            quad_so = len(quadtree.nodos)
+            quadtree.crear_nodo(quad_so, tamano=tamano, posicion=(origen[0], origen[1] + tamano))
+            quadtree.conectar_nodos(quad_raiz.identificador, quad_so)
+            #Sureste
+            nodos_se = []
+            quad_se = len(quadtree.nodos)
+            quadtree.crear_nodo(quad_se , tamano=tamano, posicion=(origen[0] + tamano, origen[1] + tamano))
+            quadtree.conectar_nodos(quad_raiz.identificador, quad_se )
+            #Checar intersecciones
+            for nodo in nodos_dentro:
+                pos_nodo = [nodo.propiedad.get("dis_x", 0), nodo.propiedad.get("dis_y", 0)]
+                if pos_nodo[0] < (origen[0] + tamano):
+                    if pos_nodo[1] < (origen[1] + tamano):
+                        nodos_no.append(nodo)
+                    else: 
+                        nodos_so.append(nodo)
+                else:
+                    if pos_nodo[1] < (origen[1] + tamano):
+                        nodos_ne.append(nodo)
+                    else:
+                        nodos_se.append(nodo)
+            #Agregar nodos al quad
+            quadtree.get_nodo(quad_no).definir_propiedad("nodos", nodos_no)
+            quadtree.get_nodo(quad_ne).definir_propiedad("nodos", nodos_ne)
+            quadtree.get_nodo(quad_so).definir_propiedad("nodos", nodos_so)
+            quadtree.get_nodo(quad_se).definir_propiedad("nodos", nodos_se)
+            quad_raiz.definir_propiedad("nodos", [])
+        
+        def distribucion_masa(quad):
+            #distribucion = [masa, centro]
+            if len(quad.vecinos) == 0:
+                nodos_contenidos = quad.propiedad.get("nodos", []) 
+                return  [len(nodos_contenidos), [nodos_contenidos[0].propiedad.get("dis_x", 0), nodos_contenidos[0].propiedad.get("dis_x", 0)]]
+            masa = 0
+            centro = [0, 0]
+            for hijo in quad.vecinos:
+                hijo = hijo[0]
+                if hijo.vecinos or hijo.propiedad.get("nodos", []): 
+                    distribucion_hijo = distribucion_masa(hijo)
+                    hijo.definir_propiedad("distribucion_masa", distribucion_hijo)
+                    masa += distribucion_hijo[0]
+                    centro_hijo = [distribucion_hijo[1][0] * distribucion_hijo[0], distribucion_hijo[1][1] * distribucion_hijo[0]]
+                    delta = [centro_hijo[0] - centro[0], centro_hijo[1] - centro[1]]
+                    direccion = direccion_vector(delta)
+                    centro[0] += direccion[0] * distribucion_hijo[0]
+                    centro[1] += direccion[1] * distribucion_hijo[0]
+            return [masa, centro]
+        
+        def fuerza_barnes_hut(pos_nodo, quad):
+            fuerza = 0
+            if len(quad.vecinos) == 0:
+                nodos_contenidos = quad.propiedad.get("nodos", [])
+                pos_nodo_final = [nodos_contenidos[0].propiedad.get("dis_x", 0), nodos_contenidos[0].propiedad.get("dis_y", 0)]
+                fuerza = (f_repulsion/(math.dist(pos_nodo, pos_nodo_final) or 0.01))
+                return fuerza
+            
+            quad_masa = quad.propiedad["distribucion_masa"]
+            r = math.dist(pos_nodo, quad_masa[1]) or 0.1
+            d = quad.propiedad["tamano"]
+            if (d/r) < theta:
+                return (f_repulsion * quad_masa[0]/math.dist(pos_nodo, quad_masa[1]))
+                       
+            for hijo in quad.vecinos:
+                hijo = hijo[0]
+                if hijo.vecinos or hijo.propiedad.get("nodos", []): 
+                    fuerza += fuerza_barnes_hut(pos_nodo, hijo)
+            return fuerza
+            
+
+        #Crear quadtree
+        quadtree.crear_nodo(0, tamano=limite_x, posicion=(0,0), nodos=grafo.nodos)
+        subdividir_quad(quadtree.get_nodo(0))
+        for quad in quadtree.nodos:
+            nodos = quad.propiedad.get("nodos", [])
+            if len(nodos) > 1 and quad.propiedad.get("tamano", 0) > radio_nodo:
+                subdividir_quad(quad)
+
+        #Calcular Barnes-Hut
+        distribucion_masa_arbol = distribucion_masa(quadtree.get_nodo(0))
+        quadtree.get_nodo(0).definir_propiedad("distribucion_masa", distribucion_masa_arbol)
+        
+        #Atraccion
+        for arista in grafo.aristas:
+            nodo_v = arista.extremos[0]
+            nodo_u = arista.extremos[1]
+            pos_nodo_v = [nodo_v.propiedad.get("dis_x", 0), nodo_v.propiedad.get("dis_y", 0)]
+            pos_nodo_u = [nodo_u.propiedad.get("dis_x", 0), nodo_u.propiedad.get("dis_y", 0)]
+            distancia = math.dist(pos_nodo_v, pos_nodo_u)
+            if distancia > longitud_arista:
+                fuerza = (longitud_arista - math.dist(pos_nodo_v, pos_nodo_u) * (1/max(1,min(len(nodo_u.vecinos), len(nodo_v.vecinos))))) * gravedad 
+                delta = [pos_nodo_v[0] - pos_nodo_u[0], pos_nodo_v[1] - pos_nodo_u[1]]
+                magnitud = math.sqrt(delta[0]**2 + delta[1]**2)
+                direccion = [delta[0]/magnitud, delta[1]/magnitud]
+                nodo_u.definir_propiedad("dis_dx", -direccion[0] * fuerza)
+                nodo_u.definir_propiedad("dis_dy", -direccion[1] * fuerza)
+                nodo_v.definir_propiedad("dis_dx", direccion[0] * fuerza)
+                nodo_v.definir_propiedad("dis_dy", direccion[1] * fuerza)
+        
+        #Repulsion con BarnesHut
+        for nodo in grafo.nodos:
+            desp_nodo = [nodo.propiedad.get("dis_dx", 0), nodo.propiedad.get("dis_dy", 0)]
+            pos_nodo = [nodo.propiedad.get("dis_x", 0), nodo.propiedad.get("dis_y", 0)]
+            delta = [distribucion_masa_arbol[1][0] - pos_nodo[0], distribucion_masa_arbol[1][1] - pos_nodo[1]]
+            direccion = direccion_vector(delta)
+            fuerza = fuerza_barnes_hut(pos_nodo, quadtree.get_nodo(0))
+            nodo.definir_propiedad("dis_dx" ,desp_nodo[0] - (direccion[0] * fuerza))
+            nodo.definir_propiedad("dis_dy" ,desp_nodo[1] - (direccion[1] * fuerza))
+
+        #Aplicar fuerzas
+        for nodo in grafo.nodos:
+            for nodo_u in grafo.nodos:
+                pos_nodo = [nodo.propiedad["dis_x"], nodo.propiedad["dis_y"]]
+                desp_nodo = [nodo.propiedad["dis_dx"], nodo.propiedad["dis_dy"]]
+                nodo.definir_propiedad("dis_x", max(0, min(limite_x - radio_nodo, pos_nodo[0] + desp_nodo[0] * delta_time)))
+                nodo.definir_propiedad("dis_y", max(0, min(limite_y - radio_nodo, pos_nodo[1] + desp_nodo[1] * delta_time)))
+        return quadtree
+
+        
+            

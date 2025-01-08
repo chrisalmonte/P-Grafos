@@ -2,13 +2,18 @@
 
 import pgrafos
 import pygame
+from enum import Enum
 
-#Propiedades del Grafo
-grafo = pgrafos.Grafo.generar_desde_archivo("grafos/malla/malla_100.gv")
-metodo_disposicion = pgrafos.Distribucion.spring
-ultimo_nodo = 0 #último nodo calculado el fotograma anterior
-ipf = 100 #maximo de nodos calculados por fotograma
-max_iteraciones_disp = 500000 #máximo de iteraciones del algoritmo
+#Distribuciones disponibles
+class Metodo(Enum):
+    SPRING = 0
+    FRUCHTERMAN = 1
+    BARNES = 2
+
+#Propiedades del grafo y método de distribución
+grafo = pgrafos.Grafo.generar_desde_archivo("grafos/Barbasi-Albert/BarbasiAlbert_variante_100.gv")
+metodo_disposicion = Metodo.BARNES
+metodo_iteraciones = 5000
 
 #Propiedades del programa
 ventana_ancho = 1280
@@ -21,21 +26,36 @@ arista_ancho = 1
 
 #Funciones para el programa
 def calcular_posiciones(grafo):
-    global max_iteraciones_disp
-    global ultimo_nodo
-    if  max_iteraciones_disp > 0:
-        metodo_disposicion(grafo, ventana_ancho - (nodo_radio * 2), ventana_alto - (nodo_radio * 2), c1=110, c2=15, c3=6, c4=0.01, comienzo=ultimo_nodo, operaciones_por_frame=ipf)
-        max_iteraciones_disp = (max_iteraciones_disp - 1) if (ultimo_nodo + ipf) >= len(grafo.nodos) else max_iteraciones_disp
-        ultimo_nodo = (ultimo_nodo + ipf) % len(grafo.nodos)
+    global metodo_iteraciones
+    if  metodo_iteraciones > 0:
+        match metodo_disposicion:
+            case Metodo.SPRING:
+                pgrafos.Distribucion.spring(grafo, ventana_ancho - nodo_radio, ventana_alto - nodo_radio, c1=110, c2=15, c3=6, c4=0.01)
+            
+            case Metodo.FRUCHTERMAN:
+                pgrafos.Distribucion.fruchterman_reingold(grafo, ventana_ancho-nodo_radio, ventana_alto-nodo_radio, radio_fuerza=50, c=8)
+            
+            case Metodo.BARNES:
+                quadtree = pgrafos.Distribucion.barnes_hut(grafo, ventana_ancho, ventana_alto, nodo_radio, delta_time, f_repulsion=0.1, gravedad=0.1)
+                #Dibujar Quadtree
+                for nodo in quadtree.nodos:
+                    posicion = nodo.propiedad.get("posicion", (0, 0))
+                    tamano = nodo.propiedad.get("tamano", 0)
+                    pygame.draw.rect(pantalla, pygame.Color(130,130,130), pygame.Rect(posicion[0], posicion[1], tamano, tamano), width=1)
+            
+            case _:
+                print("No se ha especificado un método de distribución. \nSe usará la distribución aleatoria.")
+                metodo_iteraciones = 0
+                return
+        metodo_iteraciones -= 1
 
 def dibujar_grafo(surface, grafo):
     for arista in grafo.aristas:
-        inicio = (arista.extremos[0].propiedad.get("dis_x", 0) + nodo_radio, arista.extremos[0].propiedad.get("dis_y", 0) + nodo_radio)
-        fin = (arista.extremos[1].propiedad.get("dis_x", 0) + nodo_radio, arista.extremos[1].propiedad.get("dis_y", 0) + nodo_radio)
+        inicio = (arista.extremos[0].propiedad.get("dis_x", 0), arista.extremos[0].propiedad.get("dis_y", 0))
+        fin = (arista.extremos[1].propiedad.get("dis_x", 0), arista.extremos[1].propiedad.get("dis_y", 0))
         pygame.draw.line(surface, arista_color, inicio, fin, arista_ancho)
-
     for nodo in grafo.nodos:
-        surface.blit(nodo_sprite, dest=(nodo.propiedad.get("dis_x", 0), nodo.propiedad.get("dis_y", 0)))
+        surface.blit(nodo_sprite, dest=(nodo.propiedad.get("dis_x", 0) - nodo_radio, nodo.propiedad.get("dis_y", 0) - nodo_radio))
 
 #Inicializar pygame
 pygame.init()
@@ -56,7 +76,8 @@ while ejecutandose:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             ejecutandose = False
-    
+
+    #Posicionar nodos
     pantalla.fill(ventana_color)
     calcular_posiciones(grafo)
     dibujar_grafo(pantalla, grafo)
@@ -67,4 +88,3 @@ while ejecutandose:
     #Limitar FPS y calcular Delta Time
     delta_time = clock.tick(60) / 1000
 pygame.quit()
-
